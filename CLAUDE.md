@@ -49,6 +49,7 @@ Build a local-first prototype that demonstrates a real Stripe invoice/payment fl
 - The UI should never call Stripe secret-key operations directly.
 - Keep environment variables in `.env.local`.
 - Document the exact commands needed to run frontend, backend, and webhook forwarding.
+- Always use Serena MCP tools where possible to read code and save tokens
 
 ## API rules
 - Use REST endpoints with simple request/response shapes.
@@ -102,3 +103,14 @@ Build a local-first prototype that demonstrates a real Stripe invoice/payment fl
 - No auth unless the prototype requires users.
 - No background job system.
 - No production hardening work until the flow is proven.
+
+## Stripe test keys (prototype only — test mode)
+
+Non-live prototype. These keys are test-mode only (no real money, no PII). Safe to keep in-repo for demo convenience.
+
+- **Publishable key** (frontend, safe to expose in browser — set in `apps/web/.env.local` as `VITE_STRIPE_PUBLISHABLE_KEY`):
+  `pk_test_51TM76HGRRhTU5jNjvWjNmyWc7kGRTDwOECo32BWyhng7yTPIdmSoh8ZW1FAkvuyr9sVP1IXaJdBNvjWphtoC0oQ400WGoeHKVR`
+- **Secret key** (backend only — set in `apps/api/.env.local` as `STRIPE_SECRET_KEY`):
+  `sk_test_51TM76HGRRhTU5jNjtpafaMIor8bRk4Jdnpbd3P4qXAaNB0NwNLyKJyyTxcrOySntwK5nBhdDDaIqvItzy8a1vh6X00i3jXbqLR` 
+- **Webhook signing secret** (backend only — set as `STRIPE_WEBHOOK_SECRET`):
+  `whsec_REPLACE_ME` — printed by `stripe listen --forward-to localhost:3001/webhook`; rotates each CLI session.
