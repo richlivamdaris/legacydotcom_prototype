@@ -1,4 +1,4 @@
-# Memoriams Portal — Prototype
+# Obituaries Portal — Prototype
 
 Local-first prototype that demonstrates a real Stripe invoice/payment flow end to end, per the product brief in `Memoriams_Portal_Product_Brief_and_User_Stories.md`.
 
