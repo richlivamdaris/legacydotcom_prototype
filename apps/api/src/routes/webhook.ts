@@ -2,6 +2,7 @@ import { Router, raw } from "express";
 import type Stripe from "stripe";
 import { stripe } from "../services/stripe.js";
 import { env } from "../env.js";
+import { getListings, saveListings } from "../services/store.js";
 
 export const webhookRouter: Router = Router();
 
@@ -51,6 +52,15 @@ webhookRouter.post(
         console.log(
           `[webhook] invoice.paid id=${inv.id} amount_paid=${inv.amount_paid}`
         );
+        try {
+          const listings = await getListings();
+          const next = listings.map((l) =>
+            l.invoiceId === inv.id ? { ...l, status: "published" as const } : l
+          );
+          await saveListings(next);
+        } catch (err) {
+          console.error("[webhook] failed to update listing status", err);
+        }
         break;
       }
       case "invoice.payment_failed": {

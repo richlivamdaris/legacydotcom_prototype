@@ -1,186 +1,1364 @@
-:root {
-  --bg: #f6f7fb;
-  --surface: #ffffff;
-  --border: #e3e6ee;
-  --text: #0b1f3a;
-  --muted: #5b6a85;
-  --primary: #0f3a6b;
-  --primary-hover: #0a2a50;
-  --success: #0a7c4a;
-  --warning: #a8650b;
-  --danger: #a4122a;
-  --accent: #f2c25b;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  color: var(--text);
-  background: var(--bg);
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Open Sans', sans-serif;
+  background: #f0f3f7;
+  color: #1a1a1a;
+  min-height: 100vh;
 }
 
-* { box-sizing: border-box; }
-body { margin: 0; }
-
-.app {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 24px 20px 64px;
-}
-
-.app header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  margin-bottom: 24px;
-}
-
-.app h1 {
-  margin: 0;
-  font-size: 22px;
-  color: var(--primary);
-}
-
-.app header .tag {
-  font-size: 12px;
-  color: var(--muted);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 20px;
-}
-
-@media (min-width: 760px) {
-  .grid { grid-template-columns: 1.1fr 1fr; }
-}
-
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 20px;
-}
-
-.card h2 {
-  margin: 0 0 12px;
-  font-size: 16px;
-  color: var(--primary);
-}
-
-.field { margin-bottom: 12px; }
-.field label {
-  display: block;
-  font-size: 13px;
-  color: var(--muted);
-  margin-bottom: 4px;
-}
-.field input, .field textarea, .field select {
-  width: 100%;
-  padding: 8px 10px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
+/* NAV */
+.nav {
   background: #fff;
-  font-size: 14px;
-  font-family: inherit;
-  color: var(--text);
-}
-.field input:focus, .field textarea:focus, .field select:focus {
-  outline: 2px solid var(--primary);
-  outline-offset: -1px;
-}
-
-.checkboxes {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.checkboxes label {
+  height: 56px;
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  padding: 6px 10px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-button {
-  background: var(--primary);
-  color: #fff;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-}
-button:hover:not(:disabled) { background: var(--primary-hover); }
-button:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.btn-ghost {
-  background: transparent;
-  color: var(--primary);
-  border: 1px solid var(--border);
-}
-.btn-ghost:hover:not(:disabled) { background: #eef2f8; color: var(--primary); }
-
-.status {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
-  text-transform: capitalize;
-}
-.status-draft, .status-open { background: #fff4de; color: var(--warning); }
-.status-paid { background: #e1f3ea; color: var(--success); }
-.status-uncollectible, .status-void { background: #fce3e7; color: var(--danger); }
-
-.invoice-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 8px;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border);
-}
-.invoice-row:last-child { border-bottom: none; }
-.invoice-row .meta { font-size: 12px; color: var(--muted); }
-.invoice-row .amount { font-weight: 600; }
-
-.alert {
-  padding: 10px 12px;
-  border-radius: 6px;
-  font-size: 13px;
-  margin-bottom: 12px;
-}
-.alert-error { background: #fce3e7; color: var(--danger); }
-.alert-success { background: #e1f3ea; color: var(--success); }
-.alert-info { background: #e6eef9; color: var(--primary); }
-
-a { color: var(--primary); }
-a.cta {
-  display: inline-block;
-  margin-top: 8px;
-  padding: 8px 12px;
-  background: var(--accent);
-  color: var(--text);
-  border-radius: 6px;
-  text-decoration: none;
-  font-weight: 500;
-  font-size: 13px;
-}
-a.cta:hover { filter: brightness(0.95); }
-
-.summary-row {
-  display: flex;
   justify-content: space-between;
-  padding: 6px 0;
-  font-size: 14px;
+  padding: 0 2rem;
+  border-bottom: 1px solid #e4e8ed;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
-.summary-row.total {
-  border-top: 1px solid var(--border);
-  margin-top: 8px;
-  padding-top: 10px;
+.nav-brand { display: flex; flex-direction: column; align-items: center; }
+.nav-brand .logo { font-size: 20px; font-weight: 700; color: #1a1a1a; letter-spacing: -0.5px; line-height: 1; }
+.nav-brand .logo span { color: #1a8fd1; font-size: 26px; }
+.nav-brand .powered { font-size: 12px; color: #aaa; }
+.nav-right { display: flex; align-items: center; gap: 16px; }
+.nav-right:hover .nav-fh-name { color: #1a8fd1; }
+.nav-right:hover .nav-avatar { opacity: 0.85; }
+.nav-fh-name { font-size: 14px; font-weight: 600; color: #333; }
+.nav-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, #1a8fd1, #0d5fa3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: #fff; cursor: pointer;
+}
+
+/* HEADER BAND */
+.header-band {
+  background: linear-gradient(135deg, #1a8fd1 0%, #0d5fa3 60%, #0a4a8a 100%);
+  padding: 2.25rem 2rem 0;
+  position: relative;
+  overflow: hidden;
+}
+.header-band::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 320px; height: 320px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+  pointer-events: none;
+}
+.header-band::after {
+  content: '';
+  position: absolute;
+  bottom: 20px; right: 200px;
+  width: 180px; height: 180px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.04);
+  pointer-events: none;
+}
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 2rem;
+  gap: 1rem;
+  position: relative;
+  z-index: 1;
+}
+.header-greeting { color: #fff; }
+.header-greeting .greeting-label {
+  font-size: 12px;
   font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+  margin-bottom: 5px;
 }
+.header-greeting h1 {
+  font-size: 30px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+}
+.header-greeting .header-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.8);
+}
+.header-greeting .header-meta .dot {
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.4);
+  display: inline-block;
+}
+.btn-new-obit {
+  font-family: 'Open Sans', sans-serif;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  border: 1.5px solid rgba(255,255,255,0.35);
+  border-radius: 8px;
+  padding: 11px 22px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+  letter-spacing: 0.01em;
+  backdrop-filter: blur(4px);
+}
+.btn-new-obit:hover {
+  background: rgba(255,255,255,0.25);
+  border-color: rgba(255,255,255,0.55);
+  transform: translateY(-1px);
+}
+
+/* STAT CARDS IN HEADER */
+.header-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 0;
+}
+.stat-card {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 10px 10px 0 0;
+  padding: 14px 16px;
+  color: #fff;
+}
+.stat-card .stat-label { font-size: 12px; color: rgba(255,255,255,0.65); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+.stat-card .stat-value { font-size: 24px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+.stat-card .stat-sub { font-size: 12px; color: rgba(255,255,255,0.6); }
+.stat-card .stat-sub.good { color: #7ee8a2; }
+.stat-card .stat-sub.warn { color: #ffd77a; }
+.stat-card .stat-sub.bad { color: #ff9a9a; }
+
+/* TABS */
+.tab-bar {
+  background: #fff;
+  border-bottom: 1px solid #e4e8ed;
+  padding: 0 2rem;
+  display: flex;
+  gap: 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+.tab-btn {
+  font-family: 'Open Sans', sans-serif;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 14px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #888;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.tab-btn:hover { color: #1a8fd1; }
+.tab-btn.active { color: #1a8fd1; border-bottom-color: #1a8fd1; }
+
+/* CONTENT */
+.content { padding: 1.75rem 2rem; max-width: 1200px; margin: 0 auto; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* CARDS */
+.card {
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #e4e8ed;
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+.card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+.card-title { font-size: 18px; font-weight: 700; color: #1a1a1a; }
+.card-action { font-size: 13px; color: #1a8fd1; cursor: pointer; font-weight: 600; }
+.card-action:hover { text-decoration: underline; }
+
+/* GRID LAYOUTS */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem; }
+
+/* ALERT BANNER */
+.alert {
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.alert.overdue { background: #fdecea; border: 1px solid #f5c6c2; color: #7d2b24; }
+.alert.info { background: #e8f4fb; border: 1px solid #b8d9ef; color: #1a5f8a; }
+.alert-icon { font-size: 22px; flex-shrink: 0; margin-top: 1px; }
+.alert strong { font-weight: 700; }
+.alert-actions { display: flex; gap: 8px; margin-top: 8px; }
+.btn-alert {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 15px; font-weight: 700;
+  padding: 6px 14px; border-radius: 5px;
+  cursor: pointer; border: none; transition: all 0.15s;
+}
+.btn-alert.primary { background: #c0392b; color: #fff; }
+.btn-alert.primary:hover { background: #a93226; }
+.btn-alert.secondary { background: transparent; border: 1.5px solid #c0392b; color: #c0392b; }
+
+/* LOYALTY CARD */
+.loyalty-card {
+  background: linear-gradient(135deg, #1a8fd1 0%, #0a4a8a 100%);
+  border-radius: 10px;
+  padding: 1.5rem;
+  color: #fff;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.loyalty-left h3 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+.loyalty-left p { font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.5; }
+.loyalty-points-big { text-align: right; }
+.loyalty-points-big .pts { font-size: 42px; font-weight: 700; line-height: 1; }
+.loyalty-points-big .pts-label { font-size: 12px; color: rgba(255,255,255,0.65); }
+.pts-bar-wrap { margin-top: 12px; }
+.pts-bar-label { display: flex; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 5px; }
+.pts-bar { background: rgba(255,255,255,0.2); border-radius: 4px; height: 6px; width: 100%; }
+.pts-bar-fill { background: #7ee8a2; border-radius: 4px; height: 6px; width: 66%; transition: width 0.5s; }
+.btn-redeem {
+  font-family: 'Open Sans', sans-serif;
+  background: #fff; color: #1a8fd1;
+  border: none; border-radius: 6px;
+  padding: 9px 20px; font-size: 13px; font-weight: 700;
+  cursor: pointer; white-space: nowrap; margin-top: 12px;
+  transition: all 0.15s;
+}
+.btn-redeem:hover { background: #f0f7fd; }
+
+/* RECENT LISTINGS TABLE */
+.listing-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.listing-table th {
+  text-align: left; padding: 10px 12px;
+  font-size: 11px; font-weight: 700; color: #888;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  border-bottom: 1.5px solid #e4e8ed;
+}
+.listing-table td {
+  padding: 14px 12px; border-bottom: 1px solid #f0f3f7;
+  vertical-align: middle;
+  color: #333;
+}
+.listing-table tr:last-child td { border-bottom: none; }
+.listing-table tr:hover td { background: #f8fafc; }
+.listing-table td:first-child { font-weight: 600; color: #1a1a1a; }
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px; font-weight: 600;
+  padding: 3px 10px; border-radius: 20px;
+  white-space: nowrap;
+  height: 28px;
+  width: 80px;
+}
+.badge.published { background: #e8f5e9; color: #2e7d32; }
+.badge.pending { background: #fff8e1; color: #8a6200; }
+.badge.draft { background: #f0f3f7; color: #666; }
+.badge.overdue { background: #fdecea; color: #c0392b; }
+.badge.paid { background: #e8f5e9; color: #2e7d32; }
+.badge.upcoming { background: #e8f4fb; color: #1a5f8a; }
+.text-link { color: #1a8fd1; cursor: pointer; font-weight: 600; }
+.text-link:hover { text-decoration: underline; }
+
+/* INVOICE TABLE */
+.inv-amount { font-weight: 500; }
+.inv-amount.red { color: #c0392b; }
+.inv-amount.green { color: #2e7d32; }
+
+/* QUICK ACTIONS */
+.quick-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1.25rem; }
+.qa-btn {
+  background: #fff;
+  border: 1px solid #e4e8ed;
+  border-radius: 10px;
+  padding: 16px 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.qa-btn:hover { border-color: #1a8fd1; background: #f0f7fd; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(26,143,209,0.1); }
+.qa-icon { font-size: 22px; }
+.qa-label { font-size: 13px; font-weight: 600; color: #444; }
+
+/* NEWSPAPER RATES */
+.rate-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f3f7; }
+.rate-row:last-child { border-bottom: none; }
+.rate-paper { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+.rate-meta { font-size: 12px; color: #888; }
+.rate-price { font-size: 14px; font-weight: 700; color: #1a8fd1; }
+.rate-badge { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 10px; background: #e8f5e9; color: #2e7d32; margin-left: 6px; }
+
+/* MINI CHART */
+.mini-bars { display: flex; align-items: flex-end; gap: 4px; height: 48px; margin-top: 8px; }
+.mini-bar { flex: 1; border-radius: 3px 3px 0 0; background: #1a8fd1; opacity: 0.7; min-width: 0; transition: opacity 0.15s; cursor: pointer; }
+.mini-bar:hover { opacity: 1; }
+.mini-bar.current { background: #1a8fd1; opacity: 1; }
+.bar-labels { display: flex; gap: 4px; margin-top: 4px; }
+.bar-label { flex: 1; text-align: center; font-size: 12px; color: #aaa; }
+
+/* INVOICE ITEMS */
+.inv-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 0; border-bottom: 1px solid #f0f3f7;
+  gap: 1rem;
+}
+.inv-item:last-child { border-bottom: none; }
+.inv-left { display: flex; flex-direction: column; gap: 2px; }
+.inv-num { font-size: 14px; font-weight: 700; color: #1a1a1a; }
+.inv-date { font-size: 12px; color: #888; }
+.inv-right { display: flex; align-items: center; gap: 12px; }
+.inv-amt { font-size: 14px; font-weight: 700; }
+.inv-amt.due { color: #c0392b; }
+.inv-amt.paid-amt { color: #2e7d32; }
+
+/* PAY BTN */
+.btn-pay {
+  font-family: 'Open Sans', sans-serif;
+  background: #c0392b; color: #fff;
+  border: none; border-radius: 6px;
+  padding: 8px 16px; font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: all 0.15s;
+}
+.btn-pay:hover { background: #a93226; }
+.btn-view {
+  font-family: 'Open Sans', sans-serif;
+  background: transparent; color: #1a8fd1;
+  border: 1.5px solid #1a8fd1; border-radius: 6px;
+  padding: 6px 14px; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all 0.15s;
+}
+.btn-view:hover { background: #e8f4fb; }
+
+/* SECTION LABEL */
+.section-label {
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.07em;
+  color: #aaa; margin: 0 0 12px;
+}
+
+/* PROFILE SECTION */
+.profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.profile-field { display: flex; flex-direction: column; gap: 4px; }
+.profile-field label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #aaa; }
+.profile-field span { font-size: 14px; color: #1a1a1a; font-weight: 500; }
+
+/* EMPTY STATE */
+.empty { text-align: center; padding: 2.5rem 1rem; color: #bbb; font-size: 13px; }
+.empty-icon { font-size: 36px; margin-bottom: 8px; }
+
+/* FILTER ROW */
+.filter-row { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+.filter-select {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 14px; color: #444;
+  background: #fff; border: 1px solid #dde2e8;
+  border-radius: 6px; padding: 7px 12px;
+  cursor: pointer; outline: none;
+}
+.filter-select:focus { border-color: #1a8fd1; }
+.search-input {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 13px; color: #1a1a1a;
+  background: #fff; border: 1px solid #dde2e8;
+  border-radius: 6px; padding: 7px 12px;
+  outline: none; flex: 1; min-width: 180px;
+}
+.search-input:focus { border-color: #1a8fd1; }
+.filter-count { font-size: 13px; color: #888; margin-left: auto; }
+
+@media (max-width: 720px) {
+  .header-stats { grid-template-columns: 1fr 1fr; }
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  .quick-actions { grid-template-columns: 1fr 1fr; }
+  .content { padding: 1rem; }
+  .header-band { padding: 1.25rem 1rem 0; }
+  .tab-bar { padding: 0 1rem; overflow-x: auto; }
+}
+
+/* ══════════════════════════════════════════════════════
+   OBIT FORM — SCOPED (all rules under .obit-form-overlay)
+   ══════════════════════════════════════════════════════ */
+
+  .obit-form-overlay *, .obit-form-overlay *::before, .obit-form-overlay *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  .obit-form-overlay {
+    font-family: 'Open Sans', sans-serif;
+    background: linear-gradient(160deg, #1a8fd1 0%, #0d5fa3 40%, #0a4a8a 100%);
+    min-height: 100vh;
+    color: #1a1a1a;
+  }
+
+  /* PAGE WRAPPER */
+  .obit-form-overlay .page {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  /* TITLE */
+  .obit-form-overlay h1.page-title {
+    text-align: center;
+    font-size: 28px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 1.5rem;
+  }
+
+  /* STEPPER */
+  .obit-form-overlay .stepper {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    margin-bottom: 2rem;
+    gap: 0;
+  }
+  .obit-form-overlay .step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+    z-index: 1;
+  }
+  .obit-form-overlay .step-circle {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .obit-form-overlay .step-circle.active {
+    background: #fff;
+    color: #1a8fd1;
+  }
+  .obit-form-overlay .step-circle.pending {
+    background: rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.75);
+    border: 2px solid rgba(255,255,255,0.35);
+  }
+  .obit-form-overlay .step-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.9);
+    white-space: nowrap;
+  }
+  .obit-form-overlay .step-label.muted {
+    color: rgba(255,255,255,0.45);
+  }
+  .obit-form-overlay .step-line {
+    flex: 1;
+    height: 2px;
+    background: rgba(255,255,255,0.25);
+    margin: 19px 8px 0;
+    max-width: 120px;
+  }
+
+  /* CARDS */
+  .obit-form-overlay .form-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.75rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+  .obit-form-overlay .form-card h2 {
+    font-size: 20px; font-weight: 700; color: #1a1a1a;
+    margin-bottom: 6px;
+  }
+  .obit-form-overlay .card-divider {
+    border: none; border-top: 1px solid #e4e8ed;
+    margin: 1rem 0;
+  }
+  .obit-form-overlay .card-subtitle {
+    font-size: 14px; color: #888;
+    margin-bottom: 1rem;
+  }
+  .obit-form-overlay .card-header-row {
+    display: flex; align-items: flex-start;
+    justify-content: space-between; gap: 1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  /* START CHOICE */
+  .obit-form-overlay .start-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 1rem;
+  }
+  .obit-form-overlay .start-opt {
+    border-radius: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Open Sans', sans-serif;
+    border: 2px solid transparent;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .obit-form-overlay .start-opt.primary {
+    background: #1a8fd1;
+    color: #fff;
+  }
+  .obit-form-overlay .start-opt.secondary {
+    background: #f0f7fd;
+    color: #1a8fd1;
+    border-color: #b8d9ef;
+  }
+  .obit-form-overlay .start-opt:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  /* NEWSPAPER GRID */
+  .obit-form-overlay .paper-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 0.75rem;
+  }
+  .obit-form-overlay .paper-opt {
+    border: 1.5px solid #e0e4e8;
+    border-radius: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    background: #f8f9fb;
+    transition: all 0.15s;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    position: relative;
+  }
+  .obit-form-overlay .paper-opt.selected {
+    border-color: #1a8fd1;
+    border-width: 2px;
+    background: #e8f4fb;
+  }
+  .obit-form-overlay .paper-opt .paper-name {
+    font-size: 14px; font-weight: 700; color: #1a1a1a;
+  }
+  .obit-form-overlay .paper-opt .paper-meta {
+    font-size: 12px; color: #888;
+  }
+  .obit-form-overlay .paper-opt .paper-rate {
+    font-size: 12px; font-weight: 700;
+    color: #1a8fd1; margin-top: 4px;
+  }
+  .obit-form-overlay .paper-opt .check {
+    position: absolute; top: 10px; right: 12px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #1a8fd1;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: #fff; font-weight: 700;
+  }
+
+  /* DEADLINE WARNING */
+  .obit-form-overlay .deadline-warn {
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #92400e;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 1rem;
+  }
+
+
+  /* PUBLICATION FINDER */
+  .obit-form-overlay .fav-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 14px;
+    background: #f8f9fb;
+    border: 1.5px solid #e4e8ed;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'Open Sans', sans-serif;
+  }
+  .obit-form-overlay .fav-row:hover {
+    border-color: #1a8fd1;
+    background: #f0f7fd;
+  }
+  .obit-form-overlay .fav-row .fav-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a1a1a;
+    flex: 1;
+  }
+  .obit-form-overlay .fav-row .fav-meta {
+    font-size: 13px;
+    color: #888;
+  }
+  .obit-form-overlay .fav-row .fav-rate {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1a8fd1;
+    white-space: nowrap;
+  }
+
+  /* DATE PILLS — removed, replaced with date input */
+
+  /* AUTOFILL NOTICE */
+  .obit-form-overlay .autofill-notice {
+    background: #f0fdf4;
+    border: 1px solid #86efac;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #15803d;
+    font-weight: 600;
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 1rem;
+  }
+
+  /* FORM ROWS */
+  .obit-form-overlay .form-row {
+    display: grid; gap: 16px; margin-bottom: 16px;
+  }
+  .obit-form-overlay .form-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .obit-form-overlay .form-row.cols-2 { grid-template-columns: 1fr 1fr; }
+  .obit-form-overlay .form-row.cols-3-1 { grid-template-columns: 3fr 1fr; }
+  .obit-form-overlay .form-row.cols-2-1 { grid-template-columns: 2fr 1fr; }
+
+  .obit-form-overlay .field { display: flex; flex-direction: column; gap: 6px; }
+  .obit-form-overlay .field label {
+    font-size: 13px; font-weight: 600; color: #444;
+  }
+  .obit-form-overlay .field label .req { color: #c0392b; margin-left: 3px; }
+  .obit-form-overlay .field input,
+  .obit-form-overlay .field textarea {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 14px; color: #1a1a1a;
+    background: #f5f7f9;
+    border: 1.5px solid #e0e4e8;
+    border-radius: 8px;
+    padding: 12px 14px;
+    width: 100%; outline: none;
+    transition: border-color 0.15s, background 0.15s;
+    min-height: 52px;
+  }
+  .obit-form-overlay .field input.prefilled {
+    background: #f0fdf4;
+    border-color: #86efac;
+    border-width: 2px;
+    color: #1a1a1a;
+    font-weight: 600;
+  }
+  .obit-form-overlay .field input.autocalc {
+    background: #eff6ff;
+    border-color: #93c5fd;
+    border-width: 2px;
+    color: #1e40af;
+    font-weight: 600;
+  }
+  .obit-form-overlay .field input:focus,
+  .obit-form-overlay .field textarea:focus {
+    border-color: #1a8fd1; background: #fff;
+    box-shadow: 0 0 0 3px rgba(26,143,209,0.12);
+  }
+  .obit-form-overlay .field .field-hint {
+    font-size: 12px; color: #aaa; margin-top: 2px;
+  }
+  .obit-form-overlay .field .autofill-tag {
+    font-size: 11px; font-weight: 700;
+    color: #16a34a; background: #dcfce7;
+    padding: 2px 8px; border-radius: 10px;
+    display: inline-block; margin-top: 2px;
+  }
+  .obit-form-overlay .field .autocalc-tag {
+    font-size: 11px; font-weight: 700;
+    color: #1d4ed8; background: #dbeafe;
+    padding: 2px 8px; border-radius: 10px;
+    display: inline-block; margin-top: 2px;
+  }
+  .obit-form-overlay .field textarea {
+    resize: vertical; min-height: 140px; line-height: 1.65;
+  }
+
+  /* LOGO BANNER */
+  .obit-form-overlay .logo-banner {
+    background: #f0fdf4;
+    border: 1px solid #86efac;
+    border-radius: 10px;
+    padding: 14px 18px;
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 1.25rem;
+  }
+  .obit-form-overlay .logo-thumb {
+    width: 44px; height: 44px; border-radius: 8px;
+    background: #16a34a;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; color: #fff;
+    flex-shrink: 0;
+  }
+  .obit-form-overlay .logo-banner-text .title {
+    font-size: 15px; font-weight: 700; color: #15803d;
+  }
+  .obit-form-overlay .logo-banner-text .sub {
+    font-size: 13px; color: #16a34a; margin-top: 2px;
+  }
+
+  /* WORD COUNT GUIDE */
+  .obit-form-overlay .word-guide {
+    background: #f8f9fb;
+    border: 1px solid #e4e8ed;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px; color: #555;
+    display: flex; align-items: flex-start; gap: 10px;
+    margin-bottom: 1rem;
+  }
+  .obit-form-overlay .word-count-bar {
+    margin-top: 8px;
+  }
+  .obit-form-overlay .word-count-track {
+    background: #e4e8ed; border-radius: 4px; height: 5px;
+    margin-top: 6px;
+  }
+  .obit-form-overlay .word-count-fill {
+    background: #1a8fd1; border-radius: 4px; height: 5px;
+    width: 0%; transition: width 0.3s;
+  }
+  .obit-form-overlay .obitwriter-shortcut {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 10px;
+  }
+  .obit-form-overlay .word-stats { font-size: 13px; color: #aaa; }
+  .obit-form-overlay .obitwriter-btn {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 14px; font-weight: 700;
+    background: #eff6ff; color: #1d4ed8;
+    border: 1.5px solid #93c5fd;
+    border-radius: 8px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .obit-form-overlay .obitwriter-btn:hover { background: #dbeafe; }
+
+  /* ORDER SUMMARY */
+  .obit-form-overlay .summary-rows {
+    display: flex; flex-direction: column; gap: 0;
+  }
+  .obit-form-overlay .summary-row {
+    display: flex; align-items: center;
+    padding: 11px 0;
+    border-bottom: 1px solid #f0f3f7;
+    gap: 12px;
+    font-size: 14px;
+  }
+  .obit-form-overlay .summary-row:last-child { border-bottom: none; }
+  .obit-form-overlay .summary-icon { font-size: 16px; width: 20px; flex-shrink: 0; }
+  .obit-form-overlay .summary-label { color: #888; font-weight: 500; min-width: 150px; }
+  .obit-form-overlay .summary-value { color: #1a1a1a; font-weight: 600; flex: 1; }
+  .obit-form-overlay .summary-value.warn { color: #92400e; }
+  .obit-form-overlay .summary-value.pts { color: #b45309; }
+  .obit-form-overlay .price-note {
+    font-size: 13px; color: #aaa;
+    font-style: italic; margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #f0f3f7;
+  }
+
+  /* BILLING CONFIRMATION */
+  .obit-form-overlay .billing-confirm {
+    background: #f8f9fb;
+    border: 1px solid #e4e8ed;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 1.5rem;
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  /* CTA BUTTONS */
+  .obit-form-overlay .cta-row {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 14px;
+  }
+  .obit-form-overlay .btn-draft {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 14px; font-weight: 600;
+    background: #fff; color: #555;
+    border: 1.5px solid #dde2e8;
+    border-radius: 10px;
+    padding: 16px 24px;
+    cursor: pointer; transition: all 0.15s;
+    min-height: 56px;
+  }
+  .obit-form-overlay .btn-draft:hover { border-color: #aaa; color: #333; }
+  .obit-form-overlay .btn-continue {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 18px; font-weight: 700;
+    background: #1a8fd1; color: #fff;
+    border: none; border-radius: 10px;
+    padding: 16px 24px;
+    cursor: pointer; transition: all 0.15s;
+    min-height: 56px;
+    letter-spacing: 0.01em;
+  }
+  .obit-form-overlay .btn-continue:hover { background: #1480be; box-shadow: 0 4px 16px rgba(26,143,209,0.35); }
+
+
+  /* PAYMENT & CONFIRMATION SCREENS */
+  .obit-form-overlay .step-screen { display: none; }
+  .obit-form-overlay .step-screen.active { display: block; }
+
+  /* Step indicator update */
+  .obit-form-overlay .step-circle.done {
+    background: #16a34a;
+    color: #fff;
+    border: none;
+  }
+  .obit-form-overlay .step-circle.current {
+    background: #fff;
+    color: #1a8fd1;
+    border: none;
+  }
+
+  /* Payment option cards */
+  .obit-form-overlay .payment-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 1.25rem;
+  }
+  .obit-form-overlay .payment-opt {
+    border: 2px solid #e0e4e8;
+    border-radius: 10px;
+    padding: 16px 18px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: #f8f9fb;
+  }
+  .obit-form-overlay .payment-opt.selected {
+    border-color: #1a8fd1;
+    background: #f0f7fd;
+  }
+  .obit-form-overlay .payment-opt .pay-radio {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 2px solid #d1d5db;
+    margin-top: 2px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .obit-form-overlay .payment-opt.selected .pay-radio {
+    border-color: #1a8fd1;
+    background: #1a8fd1;
+  }
+  .obit-form-overlay .payment-opt.selected .pay-radio::after {
+    content: '';
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #fff;
+  }
+  .obit-form-overlay .pay-label { font-size: 14px; font-weight: 700; color: #1a1a1a; margin-bottom: 2px; }
+  .obit-form-overlay .pay-desc  { font-size: 13px; color: #888; line-height: 1.5; }
+  .obit-form-overlay .pay-badge {
+    font-size: 11px; font-weight: 700;
+    padding: 2px 8px; border-radius: 10px;
+    background: #dcfce7; color: #15803d;
+    margin-left: 8px;
+  }
+
+  /* Stripe card input mock */
+  .obit-form-overlay .stripe-panel {
+    background: #f8f9fb;
+    border: 1.5px solid #e0e4e8;
+    border-radius: 10px;
+    padding: 18px;
+    margin-top: 0.75rem;
+  }
+  .obit-form-overlay .stripe-header {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 14px;
+  }
+  .obit-form-overlay .stripe-lock {
+    background: #635bff;
+    color: #fff;
+    border-radius: 5px;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+  }
+  .obit-form-overlay .stripe-header span {
+    font-size: 13px; color: #888;
+  }
+  .obit-form-overlay .card-input-row {
+    display: grid; gap: 10px; margin-bottom: 10px;
+  }
+  .obit-form-overlay .card-input-row.cols-2 { grid-template-columns: 1fr 1fr; }
+  .obit-form-overlay .card-input-mock {
+    background: #fff;
+    border: 1.5px solid #e0e4e8;
+    border-radius: 7px;
+    padding: 12px 14px;
+    font-size: 15px;
+    color: #bbb;
+    font-family: 'Open Sans', sans-serif;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .obit-form-overlay .card-input-mock.filled {
+    color: #1a1a1a;
+    border-color: #1a8fd1;
+  }
+  .obit-form-overlay .card-brands {
+    display: flex; gap: 6px; margin-top: 10px;
+  }
+  .obit-form-overlay .card-brand {
+    width: 36px; height: 24px;
+    border-radius: 4px;
+    border: 1px solid #e0e4e8;
+    background: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700; color: #555;
+  }
+  .obit-form-overlay .digital-wallets {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin-top: 10px;
+  }
+  .obit-form-overlay .wallet-btn {
+    border: 1.5px solid #e0e4e8;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'Open Sans', sans-serif;
+    background: #fff;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+    color: #1a1a1a;
+  }
+  .obit-form-overlay .wallet-btn:hover { background: #f8f9fb; border-color: #999; }
+  .obit-form-overlay .wallet-btn.apple { background: #000; color: #fff; border-color: #000; }
+  .obit-form-overlay .wallet-btn.google { background: #fff; }
+
+  /* Confirmation screen */
+  .obit-form-overlay .confirm-hero {
+    text-align: center;
+    padding: 2.5rem 1rem 1.5rem;
+  }
+  .obit-form-overlay .confirm-icon {
+    width: 72px; height: 72px;
+    background: #dcfce7;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px;
+    margin: 0 auto 1rem;
+  }
+  .obit-form-overlay .confirm-hero h2 {
+    font-size: 26px; font-weight: 700; color: #1a1a1a; margin-bottom: 6px;
+  }
+  .obit-form-overlay .confirm-hero p {
+    font-size: 14px; color: #888; line-height: 1.6;
+  }
+  .obit-form-overlay .confirm-ref {
+    font-size: 13px; color: #aaa; margin-top: 8px;
+  }
+  .obit-form-overlay .confirm-ref strong { color: #1a8fd1; letter-spacing: 0.05em; }
+
+  /* Loyalty points celebration */
+  .obit-form-overlay .loyalty-award {
+    background: linear-gradient(135deg, #1a8fd1 0%, #0a4a8a 100%);
+    border-radius: 14px;
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+  }
+  .obit-form-overlay .loyalty-pts-bubble {
+    background: rgba(255,255,255,0.15);
+    border-radius: 50%;
+    width: 72px; height: 72px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    flex-shrink: 0;
+    border: 2px solid rgba(255,255,255,0.3);
+  }
+  .obit-form-overlay .loyalty-pts-bubble .pts-num {
+    font-size: 22px; font-weight: 700; line-height: 1;
+  }
+  .obit-form-overlay .loyalty-pts-bubble .pts-word {
+    font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 600;
+  }
+  .obit-form-overlay .loyalty-award-text .title {
+    font-size: 15px; font-weight: 700; margin-bottom: 4px;
+  }
+  .obit-form-overlay .loyalty-award-text .sub {
+    font-size: 13px; color: rgba(255,255,255,0.75); line-height: 1.5;
+  }
+  .obit-form-overlay .loyalty-progress {
+    margin-top: 12px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 4px; height: 6px;
+  }
+  .obit-form-overlay .loyalty-progress-fill {
+    background: #7ee8a2; border-radius: 4px; height: 6px;
+    width: 90%;
+    transition: width 1s ease;
+  }
+  .obit-form-overlay .loyalty-progress-label {
+    display: flex; justify-content: space-between;
+    font-size: 12px; color: rgba(255,255,255,0.65);
+    margin-top: 5px;
+  }
+
+  /* Reward cards */
+  .obit-form-overlay .reward-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 0.75rem;
+  }
+  .obit-form-overlay .reward-card {
+    border: 1.5px solid #e0e4e8;
+    border-radius: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: #f8f9fb;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .obit-form-overlay .reward-card:hover { border-color: #1a8fd1; background: #f0f7fd; }
+  .obit-form-overlay .reward-card .reward-icon { font-size: 22px; }
+  .obit-form-overlay .reward-card .reward-name { font-size: 13px; font-weight: 700; color: #1a1a1a; }
+  .obit-form-overlay .reward-card .reward-pts  { font-size: 12px; font-weight: 700; color: #1a8fd1; }
+  .obit-form-overlay .reward-card .reward-note { font-size: 12px; color: #aaa; }
+  .obit-form-overlay .reward-card.not-enough { opacity: 0.5; cursor: default; }
+  .obit-form-overlay .reward-card.not-enough:hover { border-color: #e0e4e8; background: #f8f9fb; }
+
+  /* Next steps */
+  .obit-form-overlay .next-steps {
+    display: flex; flex-direction: column; gap: 0;
+  }
+  .obit-form-overlay .next-step {
+    display: flex; gap: 14px; align-items: flex-start;
+    padding: 14px 0;
+    border-bottom: 1px solid #f0f3f7;
+  }
+  .obit-form-overlay .next-step:last-child { border-bottom: none; }
+  .obit-form-overlay .step-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: #f0f7fd;
+    color: #1a8fd1;
+    font-size: 13px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 2px;
+  }
+  .obit-form-overlay .next-step-title { font-size: 14px; font-weight: 700; color: #1a1a1a; margin-bottom: 2px; }
+  .obit-form-overlay .next-step-desc  { font-size: 13px; color: #888; line-height: 1.5; }
+  .obit-form-overlay .done-actions {
+    display: flex; gap: 12px; margin-top: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .obit-form-overlay .btn-done-primary {
+    font-family: 'Open Sans', sans-serif;
+    background: #1a8fd1; color: #fff;
+    border: none; border-radius: 10px;
+    padding: 13px 24px; font-size: 14px; font-weight: 700;
+    cursor: pointer; transition: all 0.15s; flex: 1;
+    min-height: 52px;
+  }
+  .obit-form-overlay .btn-done-secondary {
+    font-family: 'Open Sans', sans-serif;
+    background: #fff; color: #555;
+    border: 1.5px solid #dde2e8; border-radius: 10px;
+    padding: 13px 22px; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s;
+    min-height: 52px;
+  }
+  .obit-form-overlay .invoice-preview {
+    background: #f8f9fb;
+    border: 1px solid #e4e8ed;
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 1.25rem;
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  }
+  .obit-form-overlay .invoice-preview strong { color: #1a1a1a; }
+
+
+  /* Overlay animation */
+@keyframes overlayFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.obit-form-overlay {
+  animation: overlayFadeIn 0.2s ease;
+}
+
+  /* ── REDEMPTION MODAL ──────────────────────────────────────── */
+  .redeem-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.55);
+    z-index: 3000;
+    align-items: center;
+    justify-content: center;
+  }
+  .redeem-overlay.open { display: flex; }
+  .redeem-modal {
+    background: #fff;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 520px;
+    margin: 1.5rem;
+    overflow: hidden;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.2);
+    animation: modalPop 0.2s ease;
+  }
+  @keyframes modalPop {
+    from { opacity:0; transform:scale(0.96) translateY(8px); }
+    to   { opacity:1; transform:scale(1) translateY(0); }
+  }
+  .redeem-modal-header {
+    background: linear-gradient(135deg, #1a8fd1 0%, #0a4a8a 100%);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .redeem-modal-header h3 {
+    font-size: 17px; font-weight: 700;
+    color: #fff; font-family: 'Open Sans', sans-serif;
+    margin: 0;
+  }
+  .redeem-modal-close {
+    background: rgba(255,255,255,0.2);
+    border: none; color: #fff;
+    border-radius: 50%; width: 30px; height: 30px;
+    font-size: 16px; cursor: pointer;
+    font-family: 'Open Sans', sans-serif;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .redeem-step { display: none; }
+  .redeem-step.active { display: block; }
+  .redeem-body { padding: 24px; }
+
+  /* Step 1 — choose amount */
+  .reward-amount-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 16px 0;
+  }
+  .reward-amount-opt {
+    border: 2px solid #e0e4e8;
+    border-radius: 10px;
+    padding: 14px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+    background: #f8f9fb;
+  }
+  .reward-amount-opt:hover { border-color: #1a8fd1; background: #f0f7fd; }
+  .reward-amount-opt.selected { border-color: #1a8fd1; background: #e8f4fb; }
+  .reward-amount-opt .opt-amount { font-size: 20px; font-weight: 700; color: #1a1a1a; }
+  .reward-amount-opt .opt-pts { font-size: 12px; color: #888; margin-top: 2px; }
+
+  /* Step 2 — processing */
+  .processing-state {
+    text-align: center;
+    padding: 2rem 1rem;
+  }
+  .processing-spinner {
+    width: 52px; height: 52px;
+    border: 4px solid #e4e8ed;
+    border-top-color: #1a8fd1;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .processing-state p { font-size: 14px; color: #888; margin-top: 8px; }
+  .stripe-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #f0f0ff; border-radius: 6px;
+    padding: 6px 12px; margin-top: 14px;
+    font-size: 12px; font-weight: 700; color: #635bff;
+  }
+
+  /* Step 3 — virtual card reveal */
+  .virtual-card {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    border-radius: 14px;
+    padding: 22px 24px;
+    margin: 16px 0;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  }
+  .virtual-card::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+  .virtual-card::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: -20px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(26,143,209,0.12);
+  }
+  .vc-top {
+    display: flex; justify-content: space-between;
+    align-items: flex-start; margin-bottom: 20px;
+  }
+  .vc-label {
+    font-size: 11px; font-weight: 700;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase; letter-spacing: 0.1em;
+  }
+  .vc-issuer {
+    font-size: 13px; font-weight: 700;
+    color: rgba(255,255,255,0.85);
+  }
+  .vc-network {
+    font-size: 22px; font-weight: 900;
+    color: #fff; letter-spacing: -0.5px;
+  }
+  .vc-number {
+    font-size: 18px; font-weight: 600;
+    color: #fff; letter-spacing: 0.15em;
+    margin-bottom: 16px;
+    font-family: 'Courier New', monospace;
+  }
+  .vc-bottom {
+    display: flex; gap: 24px; align-items: flex-end;
+  }
+  .vc-field .vc-field-label {
+    font-size: 9px; color: rgba(255,255,255,0.45);
+    text-transform: uppercase; letter-spacing: 0.1em;
+    margin-bottom: 3px;
+  }
+  .vc-field .vc-field-value {
+    font-size: 14px; font-weight: 700;
+    color: #fff; font-family: 'Courier New', monospace;
+  }
+  .vc-balance {
+    margin-left: auto; text-align: right;
+  }
+  .vc-balance .vc-field-label { text-align: right; }
+  .vc-balance .vc-balance-amount {
+    font-size: 22px; font-weight: 700; color: #7ee8a2;
+    font-family: 'Open Sans', sans-serif;
+  }
+  .vc-copy-btn {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 11px; font-weight: 700;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: #fff; border-radius: 5px;
+    padding: 4px 10px; cursor: pointer;
+    margin-left: 8px; vertical-align: middle;
+    transition: background 0.15s;
+  }
+  .vc-copy-btn:hover { background: rgba(255,255,255,0.25); }
+
+  .vc-instructions {
+    background: #f8f9fb;
+    border: 1px solid #e4e8ed;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin: 12px 0;
+    font-size: 13px; color: #555; line-height: 1.6;
+  }
+  .vc-instructions strong { color: #1a1a1a; }
+
+  .wallet-add-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 14px 0;
+  }
+  .wallet-add-btn {
+    font-family: 'Open Sans', sans-serif;
+    border-radius: 9px;
+    padding: 13px 16px;
+    font-size: 14px; font-weight: 700;
+    cursor: pointer; border: none;
+    display: flex; align-items: center;
+    justify-content: center; gap: 8px;
+    transition: opacity 0.15s;
+  }
+  .wallet-add-btn:hover { opacity: 0.9; }
+  .wallet-add-btn.apple { background: #000; color: #fff; }
+  .wallet-add-btn.google { background: #fff; color: #1a1a1a; border: 1.5px solid #e0e4e8; }
+  .stripe-issuing-note {
+    font-size: 12px; color: #aaa;
+    text-align: center; margin-top: 12px;
+    display: flex; align-items: center;
+    justify-content: center; gap: 5px;
+  }
+  .stripe-issuing-note .stripe-purple { color: #635bff; font-weight: 700; }
+
+
+  /* TABLE FILTERS */
+  .filter-pill {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    background: none;
+    border: none;
+    border-radius: 6px;
+    padding: 5px 12px;
+    cursor: pointer;
+    color: #888;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .filter-pill:hover { color: #444; background: rgba(0,0,0,0.04); }
+  .filter-pill.active { background: #fff; color: #1a8fd1; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+

@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "serena": {
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "--network",
+        "host",
+        "-v",
+        "/c/presales/Legacy.com/legacydotcom_prototype:/workspaces/projects/legacydotcom_prototype",
+        "ghcr.io/oraios/serena:latest",
+        "serena",
+        "start-mcp-server",
+        "--transport",
+        "stdio"
+      ],
+      "transport": "stdio"
+    }
+  }
+}

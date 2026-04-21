@@ -3,6 +3,9 @@ import cors from "cors";
 import { env } from "./env.js";
 import { stripeRouter } from "./routes/stripe.js";
 import { webhookRouter } from "./routes/webhook.js";
+import { listingsRouter } from "./routes/listings.js";
+import { loyaltyRouter } from "./routes/loyalty.js";
+import { ensureSeeded } from "./services/listings.js";
 
 const app = express();
 
@@ -19,10 +22,17 @@ app.get("/health", (_req, res) => {
 });
 
 app.use("/api", stripeRouter);
+app.use("/api/listings", listingsRouter);
+app.use("/api/loyalty", loyaltyRouter);
 
-app.listen(env.PORT, () => {
+app.listen(env.PORT, async () => {
   console.log(`[api] listening on http://localhost:${env.PORT}`);
   console.log(
     `[api] webhook forwarding: stripe listen --forward-to localhost:${env.PORT}/webhook`
   );
+  try {
+    await ensureSeeded();
+  } catch (err) {
+    console.error("[api] seeding failed", err);
+  }
 });

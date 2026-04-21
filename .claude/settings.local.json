@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__serena__list_dir",
+      "mcp__serena__get_symbols_overview",
+      "mcp__stripe__search_stripe_documentation",
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "Bash(curl -s http://localhost:3001/health)",
+      "Bash(curl -s http://localhost:3001/api/listings)",
+      "Bash(curl -s http://localhost:3001/api/invoices)",
+      "Bash(curl -s http://localhost:3001/api/loyalty)"
+    ]
+  }
+}
