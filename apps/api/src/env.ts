@@ -20,5 +20,7 @@ export const env = {
   STRIPE_SECRET_KEY: required("STRIPE_SECRET_KEY"),
   STRIPE_WEBHOOK_SECRET: required("STRIPE_WEBHOOK_SECRET"),
   PORT: Number(process.env.PORT ?? 3001),
-  WEB_ORIGIN: process.env.WEB_ORIGIN ?? "http://localhost:5173",
+  WEB_ORIGIN: process.env.WEB_ORIGIN,
+  DATA_DIR: process.env.DATA_DIR,
+  WEB_DIST_DIR: process.env.WEB_DIST_DIR,
 };

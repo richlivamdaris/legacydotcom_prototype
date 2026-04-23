@@ -3,6 +3,7 @@ import type Stripe from "stripe";
 import { stripe } from "../services/stripe.js";
 import { env } from "../env.js";
 import { getListings, saveListings } from "../services/store.js";
+import { handleMonthlyInvoicePaid } from "../services/monthly.js";
 
 export const webhookRouter: Router = Router();
 
@@ -53,11 +54,19 @@ webhookRouter.post(
           `[webhook] invoice.paid id=${inv.id} amount_paid=${inv.amount_paid}`
         );
         try {
-          const listings = await getListings();
-          const next = listings.map((l) =>
-            l.invoiceId === inv.id ? { ...l, status: "published" as const } : l
-          );
-          await saveListings(next);
+          // Monthly aggregate invoices carry our "monthly_invoice_month" metadata.
+          // If present, promote all contained listings to "published".
+          const isMonthly = inv.metadata && inv.metadata.source === "legacy-prototype" && inv.metadata.monthly_invoice_month;
+          if (isMonthly && inv.id) {
+            await handleMonthlyInvoicePaid(inv.id);
+          } else {
+            // Legacy per-listing invoice (pay-now mode)
+            const listings = await getListings();
+            const next = listings.map((l) =>
+              l.invoiceId === inv.id ? { ...l, status: "published" as const } : l
+            );
+            await saveListings(next);
+          }
         } catch (err) {
           console.error("[webhook] failed to update listing status", err);
         }

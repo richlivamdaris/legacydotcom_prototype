@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c ' *)",
+      "Bash(curl -s -o /c/temp/inv.zip http://localhost:3001/api/invoices/download-zip)",
+      "Read(//c/temp/**)",
+      "Bash(python -c \"import zipfile; z=zipfile.ZipFile\\(r'C:\\\\\\\\temp\\\\\\\\inv.zip'\\); print\\('zip entries:',len\\(z.namelist\\(\\)\\)\\); [print\\(' -',n,z.getinfo\\(n\\).file_size,'bytes'\\) for n in z.namelist\\(\\)[:5]]\")",
+      "Bash(mkdir -p \"/c/Users/RICHAR~1.LIV/AppData/Local/Temp/zc\")",
+      "Bash(curl -s -o \"/c/Users/RICHAR~1.LIV/AppData/Local/Temp/zc/inv.zip\" http://localhost:3001/api/invoices/download-zip)",
+      "Read(//c/Users/RICHAR~1.LIV/AppData/Local/Temp/zc/**)",
+      "Bash(python -c \"import zipfile; z=zipfile.ZipFile\\(r'C:\\\\\\\\Users\\\\\\\\richard.livingstone\\\\\\\\AppData\\\\\\\\Local\\\\\\\\Temp\\\\\\\\zc\\\\\\\\inv.zip'\\); print\\('zip entries:',len\\(z.namelist\\(\\)\\)\\); [print\\(' -',n,z.getinfo\\(n\\).file_size,'bytes'\\) for n in z.namelist\\(\\)[:6]]\")",
+      "mcp__serena__search_for_pattern",
+      "mcp__serena__activate_project",
+      "Bash(powershell.exe -NoProfile -Command '& { $ErrorActionPreference='\\\\''Stop'\\\\''; foreach \\($f in @\\('\\\\''installer\\\\assets\\\\start.ps1'\\\\'','\\\\''installer\\\\assets\\\\stop.ps1'\\\\'','\\\\''scripts\\\\build-installer.ps1'\\\\''\\)\\) { try { [scriptblock]::Create\\(\\(Get-Content -Raw $f\\)\\) | Out-Null; Write-Host \"OK: $f\" } catch { Write-Host \"FAIL: $f -> $\\($_.Exception.Message\\)\" } } }')",
+      "Bash(powershell.exe -NoProfile -Command '& { try { [scriptblock]::Create\\(\\(Get-Content -Raw '\\\\''installer\\\\assets\\\\start.ps1'\\\\''\\)\\) | Out-Null; Write-Host '\\\\''OK'\\\\'' } catch { Write-Host \"FAIL: $\\($_.Exception.Message\\)\" } }')"
+    ]
+  },
+    "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /c/bmad6/.claude/hooks/session-start-tts.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "$schema": "https://json.schemastore.org/claude-code-settings.json"
+}

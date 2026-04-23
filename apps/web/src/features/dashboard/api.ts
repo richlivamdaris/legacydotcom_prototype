@@ -1,3 +1,5 @@
+export type PaymentMode = "invoice" | "on_account";
+
 export interface Listing {
   id: string;
   deceasedName: string;
@@ -6,21 +8,45 @@ export interface Listing {
   amountUsd: number;
   status: "draft" | "pending" | "upcoming" | "published";
   submittedAt: string;
+  createdAtIso: string;
   invoiceId: string | null;
   invoiceHostedUrl: string | null;
+  friendlyInvoiceId: string;
+  billingPartner: boolean;
+  feePercent: number;
+  paymentMode: PaymentMode;
+  dateOfDeath: string | null;
+  obituaryText: string;
 }
 
-export interface InvoiceRow {
+export type MonthlyInvoiceStatus = "pending" | "open" | "paid" | "uncollectible" | "void";
+
+export interface MonthlyInvoiceListingSummary {
   id: string;
-  status: string | null;
-  amountDueUsd: number;
-  amountPaidUsd: number;
-  hostedInvoiceUrl: string | null;
-  description: string | null;
-  created: number;
+  friendlyInvoiceId: string;
   deceasedName: string;
   newspaper: string;
-  listingId: string;
+  publicationDate: string | null;
+  amountUsd: number;
+  status: "draft" | "pending" | "upcoming" | "published";
+  billingPartner: boolean;
+  feePercent: number;
+}
+
+export interface MonthlyInvoiceRow {
+  month: string;                        // "YYYY-MM"
+  friendlyId: string;                   // "INV-YYYY-MM"
+  periodLabel: string;                  // "April 2026"
+  dueDate: string;                      // "May 1, 2026"
+  status: MonthlyInvoiceStatus;
+  stripeInvoiceId: string | null;
+  hostedInvoiceUrl: string | null;
+  invoicePdfUrl: string | null;
+  listingCount: number;
+  totalAmountUsd: number;
+  amountDueUsd: number;
+  amountPaidUsd: number;
+  listings: MonthlyInvoiceListingSummary[];
 }
 
 export interface PointsHistoryEntry {
@@ -49,16 +75,43 @@ export interface LoyaltyState {
   cards: IssuedCard[];
 }
 
+export interface ServiceFeeBreakdownItem {
+  listingId: string;
+  friendlyInvoiceId: string;
+  stripeInvoiceId: string | null;
+  deceasedName: string;
+  newspaper: string;
+  amountUsd: number;
+  invoiceStatus: string | null;
+  invoiceHostedUrl: string | null;
+  feeUsd: number;
+  submittedAt: string;
+}
+
+export interface ServiceFeePartner {
+  newspaper: string;
+  feePercent: number;
+  listingCount: number;
+  totalListingValueUsd: number;
+  serviceFeeUsd: number;
+  breakdown: ServiceFeeBreakdownItem[];
+}
+
 export interface CreateListingInput {
   deceasedName: string;
   newspapers: string[];
   publicationDate: string | null;
   amountUsd: number;
+  paymentMode: PaymentMode;
+  notificationEmail: string;
+  dateOfDeath: string | null;
+  obituaryText: string;
+  asDraft?: boolean;
 }
 
 export interface CreateListingResult {
   listing: Listing;
-  invoiceId: string;
+  invoiceId: string | null;
   hostedInvoiceUrl: string | null;
   amountDueUsd: number;
   pointsEarned: number;
@@ -95,6 +148,11 @@ export async function fetchListings(): Promise<Listing[]> {
   return data.listings;
 }
 
+export async function deleteListing(id: string): Promise<void> {
+  const res = await fetch(`/api/listings/${encodeURIComponent(id)}`, { method: "DELETE" });
+  await parseOrThrow<{ deleted: string }>(res);
+}
+
 export async function createListing(input: CreateListingInput): Promise<CreateListingResult> {
   const res = await fetch("/api/listings", {
     method: "POST",
@@ -104,10 +162,15 @@ export async function createListing(input: CreateListingInput): Promise<CreateLi
   return parseOrThrow<CreateListingResult>(res);
 }
 
-export async function fetchInvoices(): Promise<InvoiceRow[]> {
+export async function fetchInvoices(): Promise<MonthlyInvoiceRow[]> {
   const res = await fetch("/api/invoices");
-  const data = await parseOrThrow<{ invoices: InvoiceRow[] }>(res);
+  const data = await parseOrThrow<{ invoices: MonthlyInvoiceRow[] }>(res);
   return data.invoices;
+}
+
+export async function payMonthlyInvoice(month: string): Promise<{ hostedInvoiceUrl: string | null; friendlyId: string }> {
+  const res = await fetch(`/api/invoices/month/${encodeURIComponent(month)}/pay`, { method: "POST" });
+  return parseOrThrow<{ hostedInvoiceUrl: string | null; friendlyId: string }>(res);
 }
 
 export async function syncListings(): Promise<Listing[]> {
@@ -128,4 +191,10 @@ export async function redeemPoints(input: RedeemInput): Promise<RedeemResult> {
     body: JSON.stringify(input),
   });
   return parseOrThrow<RedeemResult>(res);
+}
+
+export async function fetchServiceFees(): Promise<ServiceFeePartner[]> {
+  const res = await fetch("/api/service-fees");
+  const data = await parseOrThrow<{ partners: ServiceFeePartner[] }>(res);
+  return data.partners;
 }

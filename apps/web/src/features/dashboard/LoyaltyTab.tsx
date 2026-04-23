@@ -13,10 +13,44 @@ const REWARDS: Array<{ amount: number; pts: number }> = [
   { amount: 100, pts: 1500 },
 ];
 
+const SILVER = 1500;
+const GOLD = 100_000;
+
+function tierProgress(points: number): { label: string; progressText: string; pct: number } {
+  if (points < SILVER) {
+    return {
+      label: "Progress to Silver tier (earn 2× points)",
+      progressText: `${points.toLocaleString()} / ${SILVER.toLocaleString()}`,
+      pct: Math.min(100, Math.round((points / SILVER) * 100)),
+    };
+  }
+  if (points < GOLD) {
+    const pct = Math.min(100, Math.round(((points - SILVER) / (GOLD - SILVER)) * 100));
+    return {
+      label: "Progress to Gold tier (earn 3× points)",
+      progressText: `${points.toLocaleString()} / ${GOLD.toLocaleString()}`,
+      pct,
+    };
+  }
+  return {
+    label: "Gold tier reached — earning 3× points",
+    progressText: `${points.toLocaleString()} pts`,
+    pct: 100,
+  };
+}
+
 export function LoyaltyTab({ loyalty, admin, onRedeem }: Props) {
   const points = loyalty.points;
-  const silverGoal = 1500;
-  const silverPct = Math.min(100, Math.round((points / silverGoal) * 100));
+  const progress = tierProgress(points);
+
+  // History is newest-first from the API. Within any given day, show card
+  // issuances (redemptions) above the earn entries.
+  const sortedHistory = [...loyalty.history].sort((a, b) => {
+    if (a.date !== b.date) return 0;
+    const aCard = a.cardId ? 0 : 1;
+    const bCard = b.cardId ? 0 : 1;
+    return aCard - bCard;
+  });
 
   return (
     <>
@@ -34,10 +68,10 @@ export function LoyaltyTab({ loyalty, admin, onRedeem }: Props) {
         </div>
         <div className="pts-bar-wrap" style={{ marginTop: 16 }}>
           <div className="pts-bar-label">
-            <span>Progress to Silver tier (earn 2× points)</span>
-            <span style={{ color: "#fff", fontWeight: 700 }}>{points.toLocaleString()} / {silverGoal.toLocaleString()}</span>
+            <span>{progress.label}</span>
+            <span style={{ color: "#fff", fontWeight: 700 }}>{progress.progressText}</span>
           </div>
-          <div className="pts-bar"><div className="pts-bar-fill" style={{ width: `${silverPct}%` }} /></div>
+          <div className="pts-bar"><div className="pts-bar-fill" style={{ width: `${progress.pct}%` }} /></div>
         </div>
       </div>
 
@@ -48,7 +82,8 @@ export function LoyaltyTab({ loyalty, admin, onRedeem }: Props) {
             <EarnRow title="Standard obituary" sub="Per published listing" value="+30 pts" />
             <EarnRow title="Multi-newspaper listing" sub="Per additional newspaper" value="+15 pts" />
             <EarnRow title="10+ listings in a month" sub="Bonus on reaching threshold" value="+100 pts" />
-            <EarnRow title="Silver tier (1,500+ pts)" sub="2× multiplier on all listings" value="2×" muted last />
+            <EarnRow title="Silver tier (1,500+ pts)" sub="2× multiplier on all listings" value="2×" muted />
+            <EarnRow title="Gold tier (100,000+ pts)" sub="3× multiplier on all listings" value="3×" muted last />
           </div>
         </div>
 
@@ -122,10 +157,10 @@ export function LoyaltyTab({ loyalty, admin, onRedeem }: Props) {
             </tr>
           </thead>
           <tbody>
-            {loyalty.history.length === 0 && (
+            {sortedHistory.length === 0 && (
               <tr><td colSpan={5} className="empty">No points activity yet.</td></tr>
             )}
-            {loyalty.history.map((h) => {
+            {sortedHistory.map((h) => {
               const card = h.cardId ? loyalty.cards.find((c) => c.id === h.cardId) : null;
               return (
                 <tr key={h.id}>

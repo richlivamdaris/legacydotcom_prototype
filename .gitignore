@@ -9,3 +9,10 @@ build/
 .vite/
 coverage/
 apps/api/store/
+
+# installer build artefacts
+.build-cache/
+.build-cache-mac/
+installer/staging/
+MAC/installer/staging/
+dist-installer/
