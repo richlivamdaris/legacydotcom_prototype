@@ -1,0 +1,172 @@
+# generated: 2026-04-23
+# last_updated: 2026-04-23
+# project: legacydotcom_prototype
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: planning/stories
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog → in-progress: Automatically when first story is created (via create-story)
+#   - in-progress → done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - Developer typically creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+
+generated: 2026-04-23
+last_updated: 2026-04-23
+project: legacydotcom_prototype
+project_key: NOKEY
+tracking_system: file-system
+story_location: planning/stories
+
+development_status:
+  # ── Epic 1: Funeral-Home Onboarding (Connect Custom) ──
+  epic-1: backlog
+  1-1-module-scaffold-sdk-pin-and-platform-convention-validation-report: backlog
+  1-2-correlation-id-filter-structured-log-schema-and-uniform-error-envelope: backlog
+  1-3-stripe-client-beans-and-outbound-idempotency-key-helpers: backlog
+  1-4-webhook-endpoint-with-signature-verification-and-persistent-idempotency: backlog
+  1-5-append-only-audit-store: backlog
+  1-6-tenancy-filter-and-scoped-repositories: backlog
+  1-7-feature-flag-service: backlog
+  1-8-funeral-home-table-extension-and-connect-state-cache: backlog
+  1-9-session-derived-fh-context-and-role-resolution: backlog
+  1-10-sign-in-event-logging: backlog
+  1-11-initiate-connect-custom-account-creation: backlog
+  1-12-generate-and-email-hosted-account-link: backlog
+  1-13-handle-account-updated-webhook-and-update-connect-state-cache: backlog
+  1-14-display-connect-state-on-fh-dashboard-and-ops-view: backlog
+  1-15-requirements-due-banner-with-fresh-account-link-action: backlog
+  1-16-stripe-dashboard-deep-link-per-fh: backlog
+  1-17-resend-account-link-ops-action: backlog
+  1-18-daily-connect-state-reconciliation-job: backlog
+  epic-1-retrospective: optional
+
+  # ── Epic 2: Listings & Pre-Pay Invoicing ──
+  epic-2: backlog
+  2-1-listing-entity-state-machine-and-schema: backlog
+  2-2-newspaper-catalog-and-per-newspaper-price-quote: backlog
+  2-3-create-listing-as-draft: backlog
+  2-4-edit-listing-in-draft-pending-upcoming: backlog
+  2-5-submit-listing-approved-fh-queue-for-monthly-aggregation: backlog
+  2-6-submit-listing-pre-pay-fh-immediate-stripe-hosted-invoice: backlog
+  2-7-view-listing-detail: backlog
+  2-8-list-my-listings: backlog
+  epic-2-retrospective: optional
+
+  # ── Epic 3: Monthly Aggregation & Approved Billing ──
+  epic-3: backlog
+  3-1-monthly-invoice-entity-and-schema: backlog
+  3-2-monthly-close-scheduler: backlog
+  3-3-invoice-finalized-webhook-handler: backlog
+  3-4-list-detail-monthly-invoices: backlog
+  3-5-finalise-pay-monthly-invoice-via-stripe-hosted-page: backlog
+  3-6-invoice-paid-webhook-handler-publishes-listings-and-accrues-loyalty: backlog
+  3-7-invoice-payment-failed-webhook-handler-marks-overdue: backlog
+  3-8-download-invoice-pdf: backlog
+  3-9-bulk-export-invoice-pdf-zip-with-summary: backlog
+  3-10-multi-invoice-cart-drawer: backlog
+  epic-3-retrospective: optional
+
+  # ── Epic 4: Loyalty Earning & Redemption ──
+  epic-4: backlog
+  4-1-loyalty-points-ledger-schema-and-accrual-trigger: backlog
+  4-2-view-points-balance-and-tier: backlog
+  4-3-view-points-history: backlog
+  4-4-fulfilment-strategy-interface-selector: backlog
+  4-5-redeem-points-via-stripe-issuing-on-connected-account: backlog
+  4-6-reveal-card-details-via-stripe-ephemeral-keys: backlog
+  4-7-my-cards-list-with-remaining-balances: backlog
+  epic-4-retrospective: optional
+
+  # ── Epic 5: Billing Exception Handling ──
+  epic-5: backlog
+  5-1-freeze-unfreeze-funeral-home-ops: backlog
+  5-2-frozen-state-gating-on-new-listing-and-redemption: backlog
+  5-3-in-context-cta-from-freeze-banner-to-hosted-invoice-payment: backlog
+  5-4-invoice-payment-failed-surfaces-in-overdue-banner-and-log: backlog
+  epic-5-retrospective: optional
+
+  # ── Epic 6: Internal Operations Console ──
+  epic-6: backlog
+  6-1-admin-landing-navigation-scoped-to-ops-role: backlog
+  6-2-service-fees-read-only-roll-up: backlog
+  6-3-overdue-invoice-queue: backlog
+  6-4-simulated-error-toggle-non-prod-only: backlog
+  epic-6-retrospective: optional
+
+  # ── Epic 7: Order Wizard & Upsells (Growth) ──
+  epic-7: backlog
+  7-1-four-step-wizard-scaffold-with-back-navigation-state-preservation: backlog
+  7-2-draft-save-from-any-wizard-step: backlog
+  7-3-priced-upsells-catalogue-and-add-to-listing: backlog
+  7-4-cancel-listing-pre-publication-with-credit-note: backlog
+  7-5-wizard-review-step-with-live-price-points-preview: backlog
+  epic-7-retrospective: optional
+
+  # ── Epic 8: Automated Billing (Growth) ──
+  epic-8: backlog
+  8-1-card-on-file-storage-for-approved-fhs: backlog
+  8-2-auto-advance-monthly-invoice-on-due-date: backlog
+  8-3-embedded-stripe-payment-element-for-pre-pay: backlog
+  8-4-automated-dunning-on-overdue-monthly-invoice: backlog
+  8-5-dunning-cadence-configuration-console: backlog
+  8-6-self-service-unfreeze-on-payment: backlog
+  8-7-pre-pay-approved-upgrade-pathway: backlog
+  epic-8-retrospective: optional
+
+  # ── Epic 9: Multi-User RBAC & Chain Accounts (Growth) ──
+  epic-9: backlog
+  9-1-fh-admin-role-and-user-invite-flow: backlog
+  9-2-role-model-admin-ordering-accounts-permissions: backlog
+  9-3-audit-log-surface-for-fh-admin: backlog
+  9-4-chain-tenant-model: backlog
+  9-5-chain-consolidated-dashboard: backlog
+  9-6-chain-wide-consolidated-csv-export: backlog
+  epic-9-retrospective: optional
+
+  # ── Epic 10: Loyalty Tier Experience (Growth) ──
+  epic-10: backlog
+  10-1-tier-threshold-configuration-and-calculator: backlog
+  10-2-visible-tier-progress-bar-ui: backlog
+  10-3-account-credit-redemption: backlog
+  10-4-gold-tier-cpd-voucher-redemption: backlog
+  10-5-tier-crossing-and-redemption-threshold-notifications: backlog
+  epic-10-retrospective: optional
+
+  # ── Epic 11: Notifications Centre & Preferences (Growth) ──
+  epic-11: backlog
+  11-1-in-portal-notification-centre: backlog
+  11-2-branded-email-notifications-for-defined-event-set: backlog
+  11-3-preference-centre-for-email-opt-outs: backlog
+  epic-11-retrospective: optional
+
+  # ── Epic 12: Order Adjustment Flow (Growth) ──
+  epic-12: backlog
+  12-1-price-change-notification-with-before-after-reason: backlog
+  12-2-approve-adjustment-matching-stripe-correction: backlog
+  12-3-dispute-adjustment-route-to-ops: backlog
+  12-4-per-listing-adjustment-history: backlog
+  epic-12-retrospective: optional

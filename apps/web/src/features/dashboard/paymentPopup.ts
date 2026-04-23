@@ -1,17 +1,30 @@
-// Opens a Stripe hosted-invoice URL in a popup window, resolves when the
-// popup closes. The Stripe webhook has already updated the backend by then,
-// so the caller can refresh state from the API and see the new status.
+// Opens a Stripe hosted-invoice URL. By default uses a popup window so the
+// caller can wait for it to close (the Stripe webhook has already updated
+// the backend by then). When the user has set "open as tab" mode in the
+// nav, opens in a regular new tab and resolves immediately — the caller
+// then has to refresh manually.
 //
-// Falls back to opening in a new tab when the popup is blocked; in that
-// case the promise resolves immediately and the caller should show a hint
-// to click Refresh manually.
+// Falls back to a tab when the popup is blocked; in that case `blocked`
+// is true so the caller can show a hint to click Refresh.
+
+export const TAB_MODE_KEY = "legacy-open-as-tab";
 
 export interface PopupResult {
   closed: boolean;
   blocked: boolean;
 }
 
+function tabModeEnabled(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.localStorage.getItem(TAB_MODE_KEY) === "1";
+}
+
 export function openPaymentPopup(url: string): Promise<PopupResult> {
+  if (tabModeEnabled()) {
+    window.open(url, "_blank", "noopener,noreferrer");
+    return Promise.resolve({ closed: false, blocked: false });
+  }
+
   const features = "width=820,height=760,menubar=no,toolbar=no,location=yes,status=no,resizable=yes,scrollbars=yes";
   const win = window.open(url, "legacy-stripe-payment", features);
 

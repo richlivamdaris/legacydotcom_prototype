@@ -167,7 +167,7 @@ export function CartDrawer({ open, items, onClose, onRemove, onClear, onAllPaid,
               Clear cart
             </button>
             <div style={{ fontSize: 11, color: "#aaa", marginTop: 10, textAlign: "center", lineHeight: 1.5 }}>
-              Each invoice opens in a Stripe payment popup. Close the popup after paying — the list auto-updates.
+              Each invoice opens in a Stripe payment window (popup or tab — toggle in the nav). In popup mode the list auto-updates when you close the window; in tab mode, click Refresh after paying.
             </div>
           </div>
         )}

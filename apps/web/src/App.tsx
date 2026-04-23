@@ -14,6 +14,7 @@ import { ServiceFeesTab } from "./features/dashboard/ServiceFeesTab.js";
 import { NewObituaryModal } from "./features/dashboard/NewObituaryModal.js";
 import { RedeemModal } from "./features/dashboard/RedeemModal.js";
 import { CartDrawer, type CartItem } from "./features/dashboard/CartDrawer.js";
+import { TAB_MODE_KEY } from "./features/dashboard/paymentPopup.js";
 
 type TabName = "overview" | "invoices" | "listings" | "loyalty" | "service-fees";
 
@@ -40,6 +41,7 @@ export function App() {
   const [admin, setAdmin] = useState<boolean>(() => readFlag("legacy-admin"));
   const [freeze, setFreeze] = useState<boolean>(() => readFlag("legacy-freeze"));
   const [simulateError, setSimulateError] = useState<boolean>(() => readFlag("legacy-sim-error"));
+  const [tabMode, setTabMode] = useState<boolean>(() => readFlag(TAB_MODE_KEY));
   const [popup, setPopup] = useState<{ title: string; body: string; tone: "warn" | "error" | "info" } | null>(null);
 
   const [cartOpen, setCartOpen] = useState(false);
@@ -50,6 +52,7 @@ export function App() {
   function toggleAdmin() { setAdmin((prev) => saveFlag("legacy-admin", !prev)); }
   function toggleFreeze() { setFreeze((prev) => saveFlag("legacy-freeze", !prev)); }
   function toggleSimulateError() { setSimulateError((prev) => saveFlag("legacy-sim-error", !prev)); }
+  function toggleTabMode() { setTabMode((prev) => saveFlag(TAB_MODE_KEY, !prev)); }
 
   function handleNewObit() {
     if (freeze) {
@@ -155,6 +158,24 @@ export function App() {
             </div>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            <button
+              type="button"
+              onClick={toggleTabMode}
+              title={tabMode ? "Stripe invoices open in a new tab — click to switch to popup window" : "Stripe invoices open in a popup window — click to switch to new tab"}
+              style={{
+                background: tabMode ? "rgba(126,232,162,0.28)" : "transparent",
+                border: `1px solid ${tabMode ? "rgba(126,232,162,0.7)" : "rgba(255,255,255,0.35)"}`,
+                color: "#fff",
+                borderRadius: 20,
+                padding: "5px 14px",
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: "pointer",
+                fontFamily: "'Open Sans', sans-serif",
+              }}
+            >
+              {tabMode ? "⇱ Open in: Tab" : "⧉ Open in: Popup"}
+            </button>
             <button
               type="button"
               onClick={toggleAdmin}

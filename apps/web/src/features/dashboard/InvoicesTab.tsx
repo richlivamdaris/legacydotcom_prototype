@@ -125,7 +125,7 @@ export function InvoicesTab({ invoices, onRefresh, simulateError, onPayError }: 
       <div className="card-header">
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div className="card-title">Invoice history</div>
-          <InfoIcon note="One invoice per billing month. The Stripe hosted-invoice page opens in a popup — close the window after paying and this list updates automatically." />
+          <InfoIcon note="One invoice per billing month. The Stripe hosted-invoice page opens in a popup (or a new tab if you've switched modes in the nav) — after paying, this list updates automatically when the popup closes, or click Refresh in tab mode." />
         </div>
         <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
           <span

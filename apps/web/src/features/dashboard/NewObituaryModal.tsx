@@ -40,7 +40,11 @@ const NEWSPAPERS: NewspaperOption[] = [
 
 const FH_EMAIL = "james@greenfieldFH.com";
 
-type Step = 1 | 2 | 3;
+// Favourited publications shown on the Publication step (prototype only — not persisted).
+// Matches Joe's 2026-04-23 HTML layout: Hartford Courant (billing partner) + New Haven Register.
+const FAVOURITE_NEWSPAPERS: readonly string[] = ["Hartford Courant", "New Haven Register"];
+
+type Step = 1 | 2 | 3 | 4;
 type PayChoice = "account" | "card";
 
 export function NewObituaryModal({ onClose, onCreated, editing, onAddToCart }: Props) {
@@ -71,6 +75,7 @@ export function NewObituaryModal({ onClose, onCreated, editing, onAddToCart }: P
   const [dod, setDod] = useState(editing?.dateOfDeath ?? "");
   const [obitText, setObitText] = useState(editing?.obituaryText ?? "");
 
+  const [pubSelected, setPubSelected] = useState<boolean>(isEditing);
   const [pubFinderOpen, setPubFinderOpen] = useState(false);
   const [payChoice, setPayChoice] = useState<PayChoice>("account");
   const [newCardOpen, setNewCardOpen] = useState(false);
@@ -116,7 +121,7 @@ export function NewObituaryModal({ onClose, onCreated, editing, onAddToCart }: P
     };
   }, [onClose]);
 
-  function validateStep1(): string | null {
+  function validateStep2(): string | null {
     if (!firstName.trim() || !lastName.trim()) return "Please enter the deceased's first and last name.";
     if (!city.trim() || !state.trim()) return "Please enter city and state.";
     if (!dod.trim()) return "Date of death is required.";
@@ -152,7 +157,7 @@ export function NewObituaryModal({ onClose, onCreated, editing, onAddToCart }: P
         pointsEarned: res.pointsEarned,
         newBalance: 0,
       });
-      setStep(3);
+      setStep(4);
       await onCreated();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create listing");
@@ -244,11 +249,11 @@ export function NewObituaryModal({ onClose, onCreated, editing, onAddToCart }: P
         <h1 className="page-title">{isEditing ? "Edit Obituary Order" : "New Obituary Order"}</h1>
 
         <div className="stepper">
-          <StepDot num={1} label="Obituary Details" current={step} />
+          <StepDot num={1} label="Publication" current={step} />
           <div className="step-line" />
-          <StepDot num={2} label="Payment" current={step} />
+          <StepDot num={2} label="Obituary Details" current={step} />
           <div className="step-line" />
-          <StepDot num={3} label="Confirmed" current={step} />
+          <StepDot num={3} label="Payment" current={step} />
         </div>
 
         {step === 1 && (
@@ -258,23 +263,97 @@ export function NewObituaryModal({ onClose, onCreated, editing, onAddToCart }: P
               <div className="card-header-row"><h2>Publication</h2></div>
               <hr className="card-divider" />
 
-              <div style={{ background: "#f0f7fd", border: "2px solid #1a8fd1", borderRadius: 10, padding: "14px 18px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem" }}>
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "#1a1a1a" }}>{newspaper.name}</div>
-                  <div style={{ fontSize: 14, color: "#888", marginTop: 2 }}>
-                    {newspaper.city}, {newspaper.state} · {newspaper.group} · {newspaper.billingPartner ? "Newspaper billing partner" : `Your rate: from $${newspaper.rateFrom.toFixed(2)}`}
+              {pubSelected ? (
+                <div style={{ background: "#f0f7fd", border: "2px solid #1a8fd1", borderRadius: 10, padding: "14px 18px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem" }}>
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "#1a1a1a" }}>{newspaper.name}</div>
+                    <div style={{ fontSize: 14, color: "#888", marginTop: 2 }}>
+                      {newspaper.city}, {newspaper.state} · {newspaper.group} · {newspaper.billingPartner ? "Newspaper billing partner" : `Your rate: from $${newspaper.rateFrom.toFixed(2)}`}
+                    </div>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => setPubSelected(false)}
+                    style={{ fontFamily: "'Open Sans',sans-serif", fontSize: 14, fontWeight: 600, color: "#1a8fd1", background: "none", border: "1.5px solid #b8d9ef", borderRadius: 7, padding: "8px 16px", cursor: "pointer", whiteSpace: "nowrap" }}
+                  >
+                    Change publication
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setPubFinderOpen(true)}
-                  style={{ fontFamily: "'Open Sans',sans-serif", fontSize: 14, fontWeight: 600, color: "#1a8fd1", background: "none", border: "1.5px solid #b8d9ef", borderRadius: 7, padding: "8px 16px", cursor: "pointer", whiteSpace: "nowrap" }}
-                >
-                  Change publication
-                </button>
-              </div>
+              ) : (
+                <>
+                  <div style={{ marginBottom: "1rem" }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: "#aaa", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>Your favourited publications</div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                      {FAVOURITE_NEWSPAPERS.map((favName) => {
+                        const fav = NEWSPAPERS.find((n) => n.name === favName);
+                        if (!fav) return null;
+                        return (
+                          <div
+                            key={fav.name}
+                            className="fav-row"
+                            onClick={() => { setNewspaperName(fav.name); setPubSelected(true); setError(null); }}
+                          >
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: 14, fontWeight: 700, color: "#1a1a1a", marginBottom: 2 }}>{fav.name}</div>
+                              <div style={{ fontSize: 13, color: "#888" }}>{fav.city}, {fav.state} · {fav.group}</div>
+                            </div>
+                            {fav.billingPartner ? (
+                              <span style={{ fontSize: 11, fontWeight: 700, color: "#15803d", background: "#dcfce7", border: "1px solid #bbf7d0", borderRadius: 6, padding: "3px 8px", whiteSpace: "nowrap" }}>Billing partner</span>
+                            ) : (
+                              <span style={{ fontSize: 12, fontWeight: 600, color: "#555", whiteSpace: "nowrap" }}>From ${fav.rateFrom.toFixed(2)}</span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: "0.75rem" }}>
+                    <hr style={{ flex: 1, border: "none", borderTop: "1px solid #e4e8ed" }} />
+                    <span style={{ fontSize: 13, color: "#aaa", whiteSpace: "nowrap" }}>or find a different publication</span>
+                    <hr style={{ flex: 1, border: "none", borderTop: "1px solid #e4e8ed" }} />
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setPubFinderOpen(true)}
+                    style={{ fontFamily: "'Open Sans',sans-serif", fontSize: 14, fontWeight: 600, color: "#555", background: "#f3f4f6", border: "1.5px solid #d1d5db", borderRadius: 8, padding: "0 20px", height: 40, cursor: "pointer", width: "100%", textAlign: "left", display: "flex", alignItems: "center", gap: 8 }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="11" cy="11" r="8" />
+                      <path d="m21 21-4.3-4.3" />
+                    </svg>
+                    Find a Publication
+                  </button>
+                </>
+              )}
             </div>
 
+            {error && (
+              <div className="deadline-warn" style={{ background: "#fdecea", color: "#7d2b24", border: "1px solid #f5c6c2" }}>
+                ⚠️ {error}
+              </div>
+            )}
+
+            <div className="cta-row" style={{ marginTop: "1.5rem" }}>
+              <button type="button" className="btn-draft" onClick={onClose}>Cancel</button>
+              <button
+                type="button"
+                className="btn-continue"
+                onClick={() => {
+                  if (!pubSelected) { setError("Please select a publication to continue."); return; }
+                  setError(null);
+                  setStep(2);
+                }}
+              >
+                Next →
+              </button>
+            </div>
+          </div>
+        )}
+
+        {step === 2 && (
+          <div className="step-screen active">
             {/* ─── Publication Date ─── */}
             <div className="form-card">
               <h2>Publication Date <span className="req">*</span></h2>
@@ -410,8 +489,76 @@ export function NewObituaryModal({ onClose, onCreated, editing, onAddToCart }: P
               </div>
             )}
 
-            {/* ─── CTA row: Save as Draft · Add to Cart · Next → ─── */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
+            {/* ─── How would you like to proceed? ─── */}
+            <div className="form-card" style={{ marginTop: "1rem" }}>
+              <h2 style={{ marginBottom: 0 }}>How would you like to proceed?</h2>
+              <hr className="card-divider" />
+
+              <button
+                type="button"
+                onClick={() => {
+                  const v = validateStep2();
+                  if (v) { setError(v); return; }
+                  setError(null);
+                  setStep(3);
+                }}
+                style={{
+                  fontFamily: "'Open Sans',sans-serif",
+                  width: "100%",
+                  height: 52,
+                  background: "#1a8fd1",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 10,
+                  fontSize: 15,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  marginBottom: 12,
+                }}
+              >
+                Review &amp; Pay →
+              </button>
+
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                <div style={{ flex: 1, height: 1, background: "#e4e8ed" }} />
+                <span style={{ fontSize: 11, color: "#bbb", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>or</span>
+                <div style={{ flex: 1, height: 1, background: "#e4e8ed" }} />
+              </div>
+
+              <button
+                type="button"
+                onClick={() => void addToCart()}
+                disabled={submitting}
+                style={{
+                  fontFamily: "'Open Sans',sans-serif",
+                  width: "100%",
+                  height: 44,
+                  background: "#fff",
+                  color: "#555",
+                  border: "1.5px solid #d1d5db",
+                  borderRadius: 10,
+                  fontSize: 14,
+                  fontWeight: 600,
+                  cursor: submitting ? "not-allowed" : "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="8" cy="21" r="1" />
+                  <circle cx="19" cy="21" r="1" />
+                  <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+                </svg>
+                Add to cart — pay for multiple obituaries at once
+              </button>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginTop: "1.5rem" }}>
+              <button type="button" className="btn-draft" onClick={() => { setError(null); setStep(1); }}>
+                ← Back
+              </button>
               <button
                 type="button"
                 className="btn-draft"
@@ -420,50 +567,11 @@ export function NewObituaryModal({ onClose, onCreated, editing, onAddToCart }: P
               >
                 {submitting ? "Saving…" : "Save as Draft"}
               </button>
-              <button
-                type="button"
-                onClick={() => void addToCart()}
-                disabled={submitting}
-                style={{
-                  height: 56,
-                  background: "#fff",
-                  color: "#1a8fd1",
-                  border: "2px solid #1a8fd1",
-                  borderRadius: 10,
-                  fontSize: 14,
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 8,
-                  fontFamily: "'Open Sans', sans-serif",
-                }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="8" cy="21" r="1" />
-                  <circle cx="19" cy="21" r="1" />
-                  <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
-                </svg>
-                Add to Cart
-              </button>
-              <button
-                type="button"
-                className="btn-continue"
-                onClick={() => {
-                  const v = validateStep1();
-                  if (v) { setError(v); return; }
-                  setError(null);
-                  setStep(2);
-                }}
-              >
-                Next →
-              </button>
             </div>
           </div>
         )}
 
-        {step === 2 && (
+        {step === 3 && (
           <div className="step-screen active">
             <div className="form-card">
               <h2>Review &amp; Payment</h2>
@@ -603,7 +711,7 @@ export function NewObituaryModal({ onClose, onCreated, editing, onAddToCart }: P
             )}
 
             <div className="cta-row" style={{ marginTop: "1.5rem" }}>
-              <button type="button" className="btn-draft" onClick={() => setStep(1)}>Back</button>
+              <button type="button" className="btn-draft" onClick={() => setStep(2)}>Back</button>
               <button type="button" className="btn-continue" onClick={submit} disabled={submitting}>
                 {submitting ? "Placing order…" : "Place Order →"}
               </button>
@@ -611,7 +719,7 @@ export function NewObituaryModal({ onClose, onCreated, editing, onAddToCart }: P
           </div>
         )}
 
-        {step === 3 && confirmation && (
+        {step === 4 && confirmation && (
           <div className="step-screen active">
             {/* Hero success */}
             <div style={{ textAlign: "center", padding: "2.25rem 1rem 1.75rem", color: "#fff" }}>
@@ -686,6 +794,7 @@ export function NewObituaryModal({ onClose, onCreated, editing, onAddToCart }: P
                   className="btn-done-primary"
                   onClick={() => {
                     setStep(1);
+                    setPubSelected(false);
                     setFirstName(""); setMiddleName(""); setLastName("");
                     setDob(""); setDod(""); setObitText("");
                     setConfirmation(null);
@@ -702,7 +811,7 @@ export function NewObituaryModal({ onClose, onCreated, editing, onAddToCart }: P
       {pubFinderOpen && (
         <PubFinderModal
           current={newspaperName}
-          onSelect={(name) => { setNewspaperName(name); setPubFinderOpen(false); }}
+          onSelect={(name) => { setNewspaperName(name); setPubSelected(true); setPubFinderOpen(false); setError(null); }}
           onClose={() => setPubFinderOpen(false)}
         />
       )}
