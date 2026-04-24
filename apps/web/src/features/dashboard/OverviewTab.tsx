@@ -49,6 +49,16 @@ export function OverviewTab({ listings, loyalty, onGoto, onOpenListing }: Props)
     .filter((h) => h.points < 0)
     .reduce((s, h) => s + Math.abs(h.points), 0);
 
+  // Highest-denomination card the user could redeem right now with their
+  // current point balance. Mirrors REWARDS in LoyaltyTab.
+  const REWARDS = [
+    { amount: 25, pts: 500 },
+    { amount: 50, pts: 900 },
+    { amount: 75, pts: 1200 },
+    { amount: 100, pts: 1500 },
+  ];
+  const redeemableValueUsd = REWARDS.reduce((best, r) => (points >= r.pts ? r.amount : best), 0);
+
   const publishedThisMonth = listings.filter((l) => l.status === "published").length;
 
   return (
@@ -106,6 +116,12 @@ export function OverviewTab({ listings, loyalty, onGoto, onOpenListing }: Props)
               {points.toLocaleString()}
             </span>
             <span style={{ fontSize: 14, color: "#888", fontWeight: 500 }}>points</span>
+            {redeemableValueUsd > 0 && (
+              <span style={{ marginLeft: 12, display: "inline-flex", alignItems: "baseline", gap: 6, paddingLeft: 12, borderLeft: "1px solid #e4e8ed" }}>
+                <span style={{ fontSize: 11, color: "#888", textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 700 }}>Value</span>
+                <span style={{ fontSize: 22, fontWeight: 700, color: "#1a8fd1", lineHeight: 1 }}>${redeemableValueUsd.toLocaleString()}</span>
+              </span>
+            )}
           </div>
 
           <div style={{ background: "#f0f3f7", borderRadius: 4, height: 6, width: "100%", overflow: "hidden" }}>
