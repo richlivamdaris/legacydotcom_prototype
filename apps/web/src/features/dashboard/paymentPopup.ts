@@ -1,8 +1,14 @@
-// Opens a Stripe hosted-invoice URL. By default uses a popup window so the
-// caller can wait for it to close (the Stripe webhook has already updated
-// the backend by then). When the user has set "open as tab" mode in the
-// nav, opens in a regular new tab and resolves immediately — the caller
-// then has to refresh manually.
+// Opens a Stripe hosted-invoice URL. Two modes:
+//
+// - Popup mode: opens in a sized child window and resolves when the user
+//   closes it. By that point Stripe has already delivered the webhook,
+//   so the caller can refresh immediately.
+//
+// - Tab mode: `window.open(url, "_blank", "noopener,noreferrer")` can't be
+//   tracked (noopener severs the handle), so we instead wait for this tab
+//   to lose and regain focus (Page Visibility API). When the user finishes
+//   paying in the new tab and comes back to us, `visibilitychange` fires,
+//   we wait a brief moment for the webhook to land, then resolve.
 //
 // Falls back to a tab when the popup is blocked; in that case `blocked`
 // is true so the caller can show a hint to click Refresh.
@@ -22,12 +28,36 @@ export function tabModeEnabled(): boolean {
   return window.localStorage.getItem(TAB_MODE_KEY) !== "0";
 }
 
-export function openPaymentPopup(url: string): Promise<PopupResult> {
+// Resolves the next time the user is viewing this tab again. If the tab
+// is already visible at the point we're called (user never switched), we
+// fall back to a short timer so callers that don't rely on focus return
+// don't hang forever. `maxWaitMs` caps the wait so we always resolve.
+function waitForTabReturn(maxWaitMs = 10 * 60 * 1000): Promise<void> {
+  return new Promise((resolve) => {
+    const done = () => {
+      document.removeEventListener("visibilitychange", onChange);
+      window.removeEventListener("focus", onFocus);
+      window.clearTimeout(fallback);
+      // Give Stripe's webhook a beat to hit our backend before the caller refreshes.
+      window.setTimeout(resolve, 400);
+    };
+    const onChange = () => { if (document.visibilityState === "visible") done(); };
+    const onFocus = () => done();
+
+    document.addEventListener("visibilitychange", onChange);
+    window.addEventListener("focus", onFocus);
+    const fallback = window.setTimeout(done, maxWaitMs);
+  });
+}
+
+export async function openPaymentPopup(url: string): Promise<PopupResult> {
   if (tabModeEnabled()) {
     window.open(url, "_blank", "noopener,noreferrer");
-    return Promise.resolve({ closed: false, blocked: false });
+    // Wait for the user to return to our tab before resolving, so the
+    // caller's refresh sees the paid state set by the webhook.
+    await waitForTabReturn();
+    return { closed: false, blocked: false };
   }
-
 
   const features = "width=820,height=760,menubar=no,toolbar=no,location=yes,status=no,resizable=yes,scrollbars=yes";
   const win = window.open(url, "legacy-stripe-payment", features);
@@ -35,7 +65,8 @@ export function openPaymentPopup(url: string): Promise<PopupResult> {
   if (!win || win.closed) {
     // Popup blocked — open as a regular new tab and tell the caller it was blocked
     window.open(url, "_blank", "noopener,noreferrer");
-    return Promise.resolve({ closed: false, blocked: true });
+    await waitForTabReturn();
+    return { closed: false, blocked: true };
   }
 
   return new Promise<PopupResult>((resolve) => {

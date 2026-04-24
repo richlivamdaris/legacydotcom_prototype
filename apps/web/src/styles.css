@@ -1180,7 +1180,7 @@ body {
     display: flex; align-items: center; justify-content: center;
   }
   .redeem-step { display: none; }
-  .redeem-step.active { display: block; }
+  .redeem-step.active { display: block; overflow-y: auto; max-height: calc(100vh - 8rem); }
   .redeem-body { padding: 24px; }
 
   /* Step 1 — choose amount */

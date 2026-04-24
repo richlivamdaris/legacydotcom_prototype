@@ -1,6 +1,7 @@
 import { createObituaryInvoice } from "./invoicing.js";
 import {
   addListing,
+  baseMonthOf,
   getListings,
   saveLoyalty,
   getLoyalty,
@@ -285,7 +286,7 @@ const SEED_LISTINGS: CreateListingInput[] = [
 
 // Bump this when the seed/data model changes in a breaking way so startup
 // knows to wipe the store and re-seed.
-const SEED_VERSION = 5;
+const SEED_VERSION = 6;
 
 export async function ensureSeeded(): Promise<void> {
   const { readFile, unlink } = await import("node:fs/promises");
@@ -332,32 +333,43 @@ export async function ensureSeeded(): Promise<void> {
     }
   }
 
-  // Finalize historical months as paid so the Invoices tab shows a realistic
-  // history. Current month stays "pending" (not yet billed).
-  const now = new Date();
-  const currentMonthKey = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
+  // Mark historical months as paid so the Invoices tab shows a realistic
+  // history. Leave the 3 most-recent months unpaid (current month + the two
+  // immediately prior) — that gives the demo multiple "Pay now" rows to click
+  // through, and keeps the behaviour stable regardless of the real-world
+  // clock (so an installer shipped today and opened next year still has the
+  // same tail of unpaid invoices).
   const monthly = await getMonthlyInvoices();
+  const UNPAID_TAIL = 3;
+  const unpaidMonthKeys = new Set(
+    [...monthly]
+      .sort((a, b) => baseMonthOf(b.month).localeCompare(baseMonthOf(a.month)))
+      .slice(0, UNPAID_TAIL)
+      .map((m) => m.month),
+  );
   for (const rec of monthly) {
-    if (rec.month < currentMonthKey && rec.status !== "paid") {
-      console.log(`[seed] finalizing & marking paid monthly invoice ${rec.friendlyId} (${rec.listingIds.length} listings, $${rec.totalAmountUsd.toFixed(2)})`);
-      try {
-        await finalizeMonthlyInvoice(rec.month);
-        await markMonthlyPaidOutOfBand(rec.month);
-      } catch (err) {
-        console.error(`[seed] failed to settle ${rec.friendlyId}:`, err instanceof Error ? err.message : err);
-      }
+    if (unpaidMonthKeys.has(rec.month)) continue;
+    if (rec.status === "paid") continue;
+    console.log(`[seed] finalizing & marking paid monthly invoice ${rec.friendlyId} (${rec.listingIds.length} listings, $${rec.totalAmountUsd.toFixed(2)})`);
+    try {
+      await finalizeMonthlyInvoice(rec.month);
+      await markMonthlyPaidOutOfBand(rec.month);
+    } catch (err) {
+      console.error(`[seed] failed to settle ${rec.friendlyId}:`, err instanceof Error ? err.message : err);
     }
   }
 
   // Mark historical paymentMode="invoice" (pay-now) listings as paid too, so
-  // the demo shows them as Published alongside their on-account siblings.
+  // the demo shows them as Published alongside their on-account siblings —
+  // except for listings whose billing month is in the unpaid tail, which
+  // should visibly still need action.
+  const unpaidBaseMonths = new Set([...unpaidMonthKeys].map(baseMonthOf));
   const allListings = await getListings();
-  const payNowHistoricals = allListings.filter((l) =>
-    l.paymentMode === "invoice"
-    && l.invoiceId
-    && l.status !== "published"
-    && (l.publicationDate ?? l.createdAtIso.slice(0, 10)).slice(0, 7) < currentMonthKey
-  );
+  const payNowHistoricals = allListings.filter((l) => {
+    if (l.paymentMode !== "invoice" || !l.invoiceId || l.status === "published") return false;
+    const listingMonth = (l.publicationDate ?? l.createdAtIso.slice(0, 10)).slice(0, 7);
+    return !unpaidBaseMonths.has(listingMonth);
+  });
   if (payNowHistoricals.length > 0) {
     const { stripe } = await import("./stripe.js");
     const { saveListings } = await import("./store.js");

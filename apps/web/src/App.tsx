@@ -200,7 +200,7 @@ export function App() {
                 letterSpacing: "0.02em",
               }}
             >
-              v1.0
+              v1.1
             </span>
           </div>
 

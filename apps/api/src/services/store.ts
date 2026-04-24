@@ -80,7 +80,11 @@ interface CounterState {
 export type MonthlyInvoiceStatus = "pending" | "open" | "paid" | "uncollectible" | "void";
 
 export interface MonthlyInvoiceRecord {
-  month: string;                         // "YYYY-MM"
+  // Canonical key. For the primary monthly invoice this is the ISO
+  // "YYYY-MM". When the base invoice is already paid/finalized and new
+  // listings are added for that month, a supplementary record is created
+  // with the key suffixed as "YYYY-MM:s1", "YYYY-MM:s2", etc.
+  month: string;
   stripeInvoiceId: string | null;        // set when finalized
   hostedInvoiceUrl: string | null;
   invoicePdfUrl: string | null;
@@ -90,7 +94,13 @@ export interface MonthlyInvoiceRecord {
   createdAtIso: string;
   finalizedAtIso: string | null;
   paidAtIso: string | null;
-  friendlyId: string;                    // "INV-YYYY-MM"
+  friendlyId: string;                    // "INV-YYYY-MM" or "INV-YYYY-MM-S1"
+}
+
+// "2026-04" → "2026-04"; "2026-04:s1" → "2026-04". Used anywhere the
+// code needs to group supplementary records with their base month.
+export function baseMonthOf(key: string): string {
+  return key.split(":")[0];
 }
 
 interface StoreShape {
@@ -148,7 +158,7 @@ export async function saveMonthlyInvoices(records: MonthlyInvoiceRecord[]): Prom
 export async function upsertMonthlyInvoice(month: string, patch: Partial<MonthlyInvoiceRecord>): Promise<MonthlyInvoiceRecord> {
   const all = await getMonthlyInvoices();
   const idx = all.findIndex((m) => m.month === month);
-  const [y, mo] = month.split("-");
+  const [y, mo] = baseMonthOf(month).split("-");
   const base: MonthlyInvoiceRecord = idx >= 0 ? all[idx] : {
     month,
     stripeInvoiceId: null,

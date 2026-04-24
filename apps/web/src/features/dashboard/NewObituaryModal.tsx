@@ -586,7 +586,7 @@ export function NewObituaryModal({ onClose, onCreated, editing, onAddToCart }: P
                   <SummaryRow label="Publication" value={newspaper.name} />
                   <SummaryRow label="Date" value={formatPubDate(pubDate)} />
                   <SummaryRow label="Words" value={`${words} words`} />
-                  <SummaryRow label="Estimated price" value={<span><strong style={{ color: "#1a8fd1" }}>~${estimatedPrice.toFixed(2)}</strong> <span style={{ fontSize: 12, color: "#aaa", fontWeight: 400 }}>(confirmed on format)</span></span>} />
+                  <SummaryRow label="Estimated price" value={<span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}><strong style={{ color: "#1a8fd1" }}>~${estimatedPrice.toFixed(2)}</strong><InfoIcon note="Estimate — the final price is confirmed once the newspaper has formatted the obituary to its layout (line count, photo sizing, and any paper-specific rules can shift the total slightly)." /></span>} />
                   {newspaper.billingPartner && (
                     <SummaryRow label="Service fee to publisher" value={<span style={{ color: "#15803d", fontWeight: 700 }}>{newspaper.feePercent}% (~${partnerFeeUsd.toFixed(2)})</span>} />
                   )}

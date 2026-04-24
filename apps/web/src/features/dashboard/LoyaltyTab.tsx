@@ -138,7 +138,7 @@ export function LoyaltyTab({ loyalty, admin, onRedeem }: Props) {
         </div>
       </div>
 
-      <div className="grid-2" style={{ alignItems: "stretch" }}>
+      <div className="grid-2" style={{ alignItems: "start" }}>
         <div className="card" style={{ display: "flex", flexDirection: "column", marginBottom: 0, maxHeight: 480 }}>
           <div className="card-header"><div className="card-title">How to earn points</div></div>
           <div style={{ display: "flex", flexDirection: "column", gap: 12, fontSize: 14, color: "#333", flex: 1, minHeight: 0, overflowY: "auto" }}>
