@@ -103,7 +103,7 @@ function BreakdownModal({ partner, onClose }: { partner: ServiceFeePartner; onCl
         onClick={(e) => e.stopPropagation()}
       >
         <div
-          className="redeem-modal-header"
+          className="redeem-modal-header dark"
           style={{ background: "linear-gradient(135deg, #1a8fd1 0%, #0a4a8a 100%)" }}
         >
           <h3>📊 {partner.newspaper} — service fee breakdown</h3>

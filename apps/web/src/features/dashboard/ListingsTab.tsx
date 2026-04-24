@@ -223,7 +223,7 @@ export function ListingDetailsModal({ listing, onClose }: { listing: Listing; on
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div className="redeem-modal" style={{ maxWidth: 560 }} onClick={(e) => e.stopPropagation()}>
-        <div className="redeem-modal-header" style={{ background: readOnly ? "linear-gradient(135deg,#1a8fd1 0%,#0a4a8a 100%)" : "linear-gradient(135deg,#b45309 0%,#7c2d12 100%)" }}>
+        <div className="redeem-modal-header dark" style={{ background: readOnly ? "linear-gradient(135deg,#1a8fd1 0%,#0a4a8a 100%)" : "linear-gradient(135deg,#b45309 0%,#7c2d12 100%)" }}>
           <h3>{readOnly ? "🔒" : "✏️"} {title}</h3>
           <button type="button" className="redeem-modal-close" onClick={onClose}>✕</button>
         </div>

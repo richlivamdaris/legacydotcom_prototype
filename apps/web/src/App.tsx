@@ -16,6 +16,7 @@ import { RedeemModal } from "./features/dashboard/RedeemModal.js";
 import { CartDrawer, type CartItem } from "./features/dashboard/CartDrawer.js";
 import { TAB_MODE_KEY, tabModeEnabled } from "./features/dashboard/paymentPopup.js";
 import { CreateAccountWizard } from "./features/signup/CreateAccountWizard.js";
+import { ProfileDrawer } from "./features/profile/ProfileDrawer.js";
 
 type TabName = "overview" | "invoices" | "listings" | "loyalty" | "service-fees";
 
@@ -50,14 +51,36 @@ export function App() {
   const [openListing, setOpenListing] = useState<Listing | null>(null);
   const [editingListing, setEditingListing] = useState<Listing | null>(null);
   const [createAccountOpen, setCreateAccountOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const [accountSetupDone, setAccountSetupDone] = useState<boolean>(() => readFlag("legacy-account-setup-done"));
+  const [accountOverdue, setAccountOverdue] = useState<boolean>(() => readFlag("legacy-account-overdue"));
 
   function toggleAdmin() { setAdmin((prev) => saveFlag("legacy-admin", !prev)); }
   function toggleFreeze() { setFreeze((prev) => saveFlag("legacy-freeze", !prev)); }
   function toggleSimulateError() { setSimulateError((prev) => saveFlag("legacy-sim-error", !prev)); }
   function toggleTabMode() { setTabMode((prev) => saveFlag(TAB_MODE_KEY, !prev)); }
 
+  function toggleOverdue() {
+    setAccountOverdue((prev) => {
+      const next = saveFlag("legacy-account-overdue", !prev);
+      if (next) setTab("invoices");
+      return next;
+    });
+  }
+
+  function payOverdueAndUnlock() {
+    setAccountOverdue(saveFlag("legacy-account-overdue", false));
+  }
+
   function handleNewObit() {
+    if (accountOverdue) {
+      setPopup({
+        tone: "error",
+        title: "Account restricted — payment overdue",
+        body: "New obituary submissions are paused until your outstanding balance is settled. Clear the overdue invoice (INV-2026-02 · $980.00) to reactivate your account.",
+      });
+      return;
+    }
     if (freeze) {
       setPopup({
         tone: "warn",
@@ -149,10 +172,11 @@ export function App() {
 
   return (
     <>
-      {/* Solid blue nav — brand left, Insight AI logo center, cart + admin + avatar right */}
+      {/* Solid blue nav — brand left, controls right. Insight AI + admin
+          toggles live in the floating stack at bottom-right. */}
       <nav style={{ background: "#1a8fd1", height: 72, position: "sticky", top: 0, zIndex: 100 }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 2rem", display: "grid", gridTemplateColumns: "1fr auto 1fr", alignItems: "center", height: "100%", gap: 16 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, justifySelf: "start" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 2rem", display: "flex", alignItems: "center", justifyContent: "space-between", height: "100%", gap: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{ fontSize: 22, fontWeight: 700, color: "#fff", letterSpacing: "-0.5px", lineHeight: 1 }}>
               app<span style={{ color: "rgba(255,255,255,0.6)" }}>.</span>
             </div>
@@ -161,86 +185,7 @@ export function App() {
             </div>
           </div>
 
-          <div style={{ justifySelf: "center", display: "flex", alignItems: "center", gap: 10, background: "#fff", borderRadius: 22, padding: "6px 14px 6px 16px", boxShadow: "0 2px 10px rgba(0,0,0,0.12)" }}>
-            <div style={{ display: "flex", alignItems: "baseline", fontFamily: "'Open Sans', sans-serif", fontWeight: 800, fontSize: 18, letterSpacing: "-0.5px", lineHeight: 1 }}>
-              <span style={{ color: "#1a1a1a" }}>Insight</span>
-              <span
-                style={{
-                  marginLeft: 4,
-                  background: "linear-gradient(90deg, #6f5cff 0%, #c64bd6 60%, #ff5fa0 100%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                  color: "transparent",
-                }}
-              >
-                AI
-              </span>
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" style={{ marginLeft: 3, transform: "translateY(-7px)" }} aria-hidden="true">
-                <defs>
-                  <linearGradient id="iai-spark" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stopColor="#6f5cff" />
-                    <stop offset="60%" stopColor="#c64bd6" />
-                    <stop offset="100%" stopColor="#ff5fa0" />
-                  </linearGradient>
-                </defs>
-                <path d="M12 2 L13.6 8.4 L20 10 L13.6 11.6 L12 18 L10.4 11.6 L4 10 L10.4 8.4 Z" fill="url(#iai-spark)" />
-              </svg>
-            </div>
-            <span
-              style={{
-                fontSize: 11,
-                fontWeight: 700,
-                color: "#6f5cff",
-                background: "#f2eeff",
-                border: "1px solid #ddd5ff",
-                borderRadius: 999,
-                padding: "2px 8px",
-                lineHeight: 1.2,
-                letterSpacing: "0.02em",
-              }}
-            >
-              v1.1
-            </span>
-          </div>
-
-          <div style={{ display: "flex", alignItems: "center", gap: 16, justifySelf: "end" }}>
-            <button
-              type="button"
-              onClick={toggleTabMode}
-              title={tabMode ? "Stripe invoices open in a new tab — click to switch to popup window" : "Stripe invoices open in a popup window — click to switch to new tab"}
-              style={{
-                background: tabMode ? "rgba(126,232,162,0.28)" : "transparent",
-                border: `1px solid ${tabMode ? "rgba(126,232,162,0.7)" : "rgba(255,255,255,0.35)"}`,
-                color: "#fff",
-                borderRadius: 20,
-                padding: "5px 14px",
-                fontSize: 12,
-                fontWeight: 600,
-                cursor: "pointer",
-                fontFamily: "'Open Sans', sans-serif",
-              }}
-            >
-              {tabMode ? "⇱ Open in: Tab" : "⧉ Open in: Popup"}
-            </button>
-            <button
-              type="button"
-              onClick={toggleAdmin}
-              title={admin ? "Legacy.com Admin mode is ON — click to turn off" : "Legacy.com Admin mode is OFF — click to turn on"}
-              style={{
-                background: admin ? "rgba(126,232,162,0.28)" : "transparent",
-                border: `1px solid ${admin ? "rgba(126,232,162,0.7)" : "rgba(255,255,255,0.35)"}`,
-                color: "#fff",
-                borderRadius: 20,
-                padding: "5px 14px",
-                fontSize: 12,
-                fontWeight: 600,
-                cursor: "pointer",
-                fontFamily: "'Open Sans', sans-serif",
-              }}
-            >
-              {admin ? "● Legacy.com Admin" : "○ Legacy.com Admin"}
-            </button>
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
             <button
               type="button"
               style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.85)", padding: 6, display: "flex" }}
@@ -270,9 +215,9 @@ export function App() {
             </button>
             <button
               type="button"
-              onClick={() => setCreateAccountOpen(true)}
+              onClick={() => setProfileOpen(true)}
               style={{ position: "relative", width: 38, height: 38, borderRadius: "50%", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", border: "none", padding: 0, flexShrink: 0 }}
-              title={accountSetupDone ? "Account setup complete — click to add another account" : "Account setup needed — click to complete"}
+              title={accountSetupDone ? "View profile & settings" : "View profile — account setup needed"}
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
                 <rect x="11" y="0" width="2" height="7" rx="1" fill="#1a8fd1" />
@@ -309,7 +254,15 @@ export function App() {
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 2rem", display: "flex", alignItems: "center", justifyContent: "space-between", height: "100%" }}>
           <div style={{ display: "flex", gap: 0, height: "100%" }}>
             <button type="button" className={`tab-btn ${tab === "overview" ? "active" : ""}`} onClick={() => setTab("overview")}>Overview</button>
-            <button type="button" className={`tab-btn ${tab === "invoices" ? "active" : ""}`} onClick={() => setTab("invoices")}>Invoices</button>
+            <button type="button" className={`tab-btn ${tab === "invoices" ? "active" : ""}`} onClick={() => setTab("invoices")}>
+              Invoices
+              {accountOverdue && (
+                <span
+                  aria-label="Account overdue"
+                  style={{ display: "inline-block", width: 7, height: 7, background: "#ef4444", borderRadius: "50%", marginLeft: 6, verticalAlign: "middle", flexShrink: 0 }}
+                />
+              )}
+            </button>
             <button type="button" className={`tab-btn ${tab === "listings" ? "active" : ""}`} onClick={() => setTab("listings")}>Listings</button>
             <button type="button" className={`tab-btn ${tab === "loyalty" ? "active" : ""}`} onClick={() => setTab("loyalty")}>Loyalty</button>
             {admin && (
@@ -319,6 +272,7 @@ export function App() {
           <button
             type="button"
             onClick={handleNewObit}
+            title={accountOverdue ? "Account restricted — clear overdue invoice first" : ""}
             style={{
               height: 42,
               background: "#1a8fd1",
@@ -328,63 +282,17 @@ export function App() {
               padding: "0 22px",
               fontSize: 14,
               fontWeight: 700,
-              cursor: "pointer",
+              cursor: accountOverdue ? "not-allowed" : "pointer",
               fontFamily: "'Open Sans', sans-serif",
               whiteSpace: "nowrap",
-              transition: "background 0.15s",
+              transition: "background 0.15s, opacity 0.15s",
+              opacity: accountOverdue ? 0.45 : 1,
             }}
           >
             + New Obituary
           </button>
         </div>
       </div>
-
-      {/* Admin toolbar — only shown when admin is on */}
-      {admin && (
-        <div style={{ background: "#fffbeb", borderBottom: "1px solid #fcd34d", padding: "8px 2rem" }}>
-          <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: "#92400e", textTransform: "uppercase", letterSpacing: "0.07em" }}>
-              Legacy.com Admin
-            </span>
-            <button
-              type="button"
-              onClick={toggleFreeze}
-              title={freeze ? "Account is frozen — new obituaries blocked" : "Freeze is off"}
-              style={{
-                fontFamily: "'Open Sans', sans-serif",
-                fontSize: 12,
-                fontWeight: 600,
-                padding: "4px 12px",
-                borderRadius: 6,
-                border: `1.5px solid ${freeze ? "#c0392b" : "#e0e4e8"}`,
-                background: freeze ? "#fdecea" : "#fff",
-                color: freeze ? "#c0392b" : "#666",
-                cursor: "pointer",
-              }}
-            >
-              {freeze ? "❄ Freeze: ON" : "❄ Freeze: off"}
-            </button>
-            <button
-              type="button"
-              onClick={toggleSimulateError}
-              title={simulateError ? "Payments will fail (simulated)" : "Simulate payment error off"}
-              style={{
-                fontFamily: "'Open Sans', sans-serif",
-                fontSize: 12,
-                fontWeight: 600,
-                padding: "4px 12px",
-                borderRadius: 6,
-                border: `1.5px solid ${simulateError ? "#b45309" : "#e0e4e8"}`,
-                background: simulateError ? "#fef3c7" : "#fff",
-                color: simulateError ? "#b45309" : "#666",
-                cursor: "pointer",
-              }}
-            >
-              {simulateError ? "⚠ Pay Error: ON" : "⚠ Pay Error: off"}
-            </button>
-          </div>
-        </div>
-      )}
 
       <div className="content">
         {loading && <div className="empty">Loading…</div>}
@@ -424,6 +332,8 @@ export function App() {
                 onRefresh={refreshAll}
                 simulateError={simulateError}
                 onPayError={handlePayError}
+                accountOverdue={accountOverdue}
+                onPayOverdue={payOverdueAndUnlock}
               />
             )}
             {tab === "listings" && (
@@ -483,6 +393,14 @@ export function App() {
         <ListingDetailsModal listing={openListing} onClose={() => setOpenListing(null)} />
       )}
 
+      {profileOpen && (
+        <ProfileDrawer
+          onClose={() => setProfileOpen(false)}
+          onNewAccount={() => setCreateAccountOpen(true)}
+          setupNeeded={!accountSetupDone}
+        />
+      )}
+
       {createAccountOpen && (
         <CreateAccountWizard
           onClose={() => setCreateAccountOpen(false)}
@@ -493,6 +411,152 @@ export function App() {
         />
       )}
 
+      {/* Floating demo-control stack — anchored bottom-right, never scrolls.
+          Right-aligned + content-sized so buttons hug the right edge and
+          only extend leftward as far as their label needs. Order top→bottom:
+          Toggle overdue, (admin-only) Freeze + Pay Error, Legacy.com Admin,
+          Insight AI (amdaris.com link, bottom). */}
+      <div
+        style={{
+          position: "fixed", bottom: 16, right: 16, zIndex: 2147483646,
+          display: "flex", flexDirection: "column", gap: 6,
+          alignItems: "stretch", pointerEvents: "auto",
+        }}
+      >
+        {/* Toggle Overdue */}
+        <StackBtn
+          onClick={toggleOverdue}
+          active={accountOverdue}
+          activeColor="#ef4444"
+          activeHover="#c0392b"
+          title={accountOverdue ? "Overdue simulation is ON — click to turn off" : "Simulate an overdue account (demo control)"}
+          icon={(
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+              <path d="M21 3v5h-5" />
+              <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+              <path d="M8 16H3v5" />
+            </svg>
+          )}
+        >
+          {accountOverdue ? "Overdue: ON" : "Toggle overdue"}
+        </StackBtn>
+
+        {/* Open-in-tab mode (Stripe invoice / onboarding window) */}
+        <StackBtn
+          onClick={toggleTabMode}
+          active={tabMode}
+          activeColor="#16a34a"
+          activeHover="#15803d"
+          activeBg="#dcfce7"
+          title={tabMode
+            ? "Stripe invoices open in a new tab — click to switch to popup window"
+            : "Stripe invoices open in a popup window — click to switch to new tab"}
+          icon={<span style={{ fontSize: 11, lineHeight: 1 }}>{tabMode ? "⇱" : "⧉"}</span>}
+        >
+          {tabMode ? "Open in: Tab" : "Open in: Popup"}
+        </StackBtn>
+
+        {/* Admin-only: Freeze */}
+        {admin && (
+          <StackBtn
+            onClick={toggleFreeze}
+            active={freeze}
+            activeColor="#c0392b"
+            activeHover="#a93226"
+            activeBg="#fdecea"
+            title={freeze ? "Account is frozen — new obituaries blocked" : "Freeze is off"}
+            icon={<span style={{ fontSize: 11 }}>❄</span>}
+          >
+            {freeze ? "Freeze: ON" : "Freeze: off"}
+          </StackBtn>
+        )}
+
+        {/* Admin-only: Pay Error */}
+        {admin && (
+          <StackBtn
+            onClick={toggleSimulateError}
+            active={simulateError}
+            activeColor="#b45309"
+            activeHover="#92400e"
+            activeBg="#fef3c7"
+            title={simulateError ? "Payments will fail (simulated)" : "Simulate payment error off"}
+            icon={<span style={{ fontSize: 11 }}>⚠</span>}
+          >
+            {simulateError ? "Pay Error: ON" : "Pay Error: off"}
+          </StackBtn>
+        )}
+
+        {/* Admin */}
+        <StackBtn
+          onClick={toggleAdmin}
+          active={admin}
+          activeColor="#16a34a"
+          activeHover="#15803d"
+          activeBg="#dcfce7"
+          title={admin ? "Admin mode is ON — click to turn off" : "Admin mode is OFF — click to turn on"}
+          icon={<span style={{ fontSize: 10, lineHeight: 1 }}>{admin ? "●" : "○"}</span>}
+        >
+          Admin
+        </StackBtn>
+
+        {/* Insight AI — links to amdaris.com. Kept at the bottom of the stack. */}
+        <a
+          href="https://www.amdaris.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Insight AI — visit amdaris.com"
+          style={{
+            textDecoration: "none",
+            fontFamily: "'Open Sans', sans-serif", fontSize: 11, fontWeight: 600,
+            background: "#fff", border: "1.5px solid #dde2e8",
+            borderRadius: 8, padding: "5px 10px",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+            display: "flex", alignItems: "center", gap: 6,
+            cursor: "pointer",
+            transition: "border-color 0.15s",
+          }}
+          onMouseOver={(e) => { e.currentTarget.style.borderColor = "#aaa"; }}
+          onMouseOut={(e) => { e.currentTarget.style.borderColor = "#dde2e8"; }}
+        >
+          <span style={{ display: "flex", alignItems: "baseline", fontWeight: 800, fontSize: 13, letterSpacing: "-0.3px", lineHeight: 1 }}>
+            <span style={{ color: "#1a1a1a" }}>Insight</span>
+            <span
+              style={{
+                marginLeft: 2,
+                background: "linear-gradient(90deg, #6f5cff 0%, #c64bd6 60%, #ff5fa0 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+                color: "transparent",
+              }}
+            >
+              AI
+            </span>
+            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" style={{ marginLeft: 1, transform: "translateY(-4px)" }} aria-hidden="true">
+              <defs>
+                <linearGradient id="iai-spark-stack" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#6f5cff" />
+                  <stop offset="60%" stopColor="#c64bd6" />
+                  <stop offset="100%" stopColor="#ff5fa0" />
+                </linearGradient>
+              </defs>
+              <path d="M12 2 L13.6 8.4 L20 10 L13.6 11.6 L12 18 L10.4 11.6 L4 10 L10.4 8.4 Z" fill="url(#iai-spark-stack)" />
+            </svg>
+          </span>
+          <span
+            style={{
+              fontSize: 9, fontWeight: 700, color: "#6f5cff",
+              background: "#f2eeff", border: "1px solid #ddd5ff",
+              borderRadius: 999, padding: "1px 6px", lineHeight: 1.2,
+              letterSpacing: "0.02em",
+            }}
+          >
+            v1.2
+          </span>
+        </a>
+      </div>
+
       {popup && (
         <div
           className="redeem-overlay open"
@@ -500,7 +564,7 @@ export function App() {
         >
           <div className="redeem-modal" style={{ maxWidth: 480 }} onClick={(e) => e.stopPropagation()}>
             <div
-              className="redeem-modal-header"
+              className="redeem-modal-header dark"
               style={{
                 background:
                   popup.tone === "error" ? "linear-gradient(135deg, #c0392b 0%, #7d2b24 100%)" :
@@ -530,5 +594,49 @@ export function App() {
         </div>
       )}
     </>
+  );
+}
+
+// Shared styling for the bottom-right floating demo-control stack. Each
+// button is a white pill with grey border when idle, flipping to a
+// coloured accent when active (red / amber / green). Never scrolls —
+// the parent container is position: fixed.
+function StackBtn({
+  onClick, active, activeColor, activeHover, activeBg,
+  title, icon, children,
+}: {
+  onClick: () => void;
+  active: boolean;
+  activeColor: string;
+  activeHover: string;
+  activeBg?: string;
+  title: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={title}
+      style={{
+        fontFamily: "'Open Sans', sans-serif", fontSize: 11, fontWeight: 600,
+        background: active ? (activeBg ?? "#fff") : "#fff",
+        border: `1.5px solid ${active ? activeColor : "#dde2e8"}`,
+        borderRadius: 8, padding: "5px 10px", cursor: "pointer",
+        color: active ? activeColor : "#888",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+        display: "flex", alignItems: "center", justifyContent: "flex-start", gap: 6,
+        whiteSpace: "nowrap",
+        transition: "border-color 0.15s, color 0.15s, background 0.15s",
+      }}
+      onMouseOver={(e) => { e.currentTarget.style.borderColor = active ? activeHover : "#aaa"; }}
+      onMouseOut={(e) => { e.currentTarget.style.borderColor = active ? activeColor : "#dde2e8"; }}
+    >
+      <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 11, flexShrink: 0 }}>
+        {icon}
+      </span>
+      <span>{children}</span>
+    </button>
   );
 }
