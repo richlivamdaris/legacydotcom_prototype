@@ -8,6 +8,7 @@ import { webhookRouter } from "./routes/webhook.js";
 import { listingsRouter } from "./routes/listings.js";
 import { loyaltyRouter } from "./routes/loyalty.js";
 import { serviceFeesRouter } from "./routes/serviceFees.js";
+import { connectRouter } from "./routes/connect.js";
 import { ensureSeeded } from "./services/listings.js";
 
 const app = express();
@@ -30,6 +31,7 @@ app.use("/api", stripeRouter);
 app.use("/api/listings", listingsRouter);
 app.use("/api/loyalty", loyaltyRouter);
 app.use("/api/service-fees", serviceFeesRouter);
+app.use("/api/connect", connectRouter);
 
 if (env.WEB_DIST_DIR) {
   const webDist = resolve(env.WEB_DIST_DIR);

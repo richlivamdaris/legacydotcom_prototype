@@ -15,6 +15,7 @@ import { NewObituaryModal } from "./features/dashboard/NewObituaryModal.js";
 import { RedeemModal } from "./features/dashboard/RedeemModal.js";
 import { CartDrawer, type CartItem } from "./features/dashboard/CartDrawer.js";
 import { TAB_MODE_KEY, tabModeEnabled } from "./features/dashboard/paymentPopup.js";
+import { CreateAccountWizard } from "./features/signup/CreateAccountWizard.js";
 
 type TabName = "overview" | "invoices" | "listings" | "loyalty" | "service-fees";
 
@@ -48,6 +49,8 @@ export function App() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [openListing, setOpenListing] = useState<Listing | null>(null);
   const [editingListing, setEditingListing] = useState<Listing | null>(null);
+  const [createAccountOpen, setCreateAccountOpen] = useState(false);
+  const [accountSetupDone, setAccountSetupDone] = useState<boolean>(() => readFlag("legacy-account-setup-done"));
 
   function toggleAdmin() { setAdmin((prev) => saveFlag("legacy-admin", !prev)); }
   function toggleFreeze() { setFreeze((prev) => saveFlag("legacy-freeze", !prev)); }
@@ -265,12 +268,38 @@ export function App() {
                 </span>
               )}
             </button>
-            <div
-              style={{ width: 38, height: 38, borderRadius: "50%", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700, color: "#1a8fd1", cursor: "pointer" }}
-              title="Greenfield Funeral Home"
+            <button
+              type="button"
+              onClick={() => setCreateAccountOpen(true)}
+              style={{ position: "relative", width: 38, height: 38, borderRadius: "50%", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", border: "none", padding: 0, flexShrink: 0 }}
+              title={accountSetupDone ? "Account setup complete — click to add another account" : "Account setup needed — click to complete"}
             >
-              GF
-            </div>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+                <rect x="11" y="0" width="2" height="7" rx="1" fill="#1a8fd1" />
+                <rect x="8" y="2" width="8" height="2" rx="1" fill="#1a8fd1" />
+                <polygon points="2,11 12,5 22,11" fill="#1a8fd1" />
+                <rect x="3" y="11" width="18" height="13" rx="1" fill="#1a8fd1" />
+                <path d="M9.5 24 L9.5 18.5 C9.5 15.5 14.5 15.5 14.5 18.5 L14.5 24 Z" fill="rgba(10,74,138,0.3)" />
+                <rect x="4.5" y="13" width="3.5" height="3.5" rx="0.5" fill="rgba(10,74,138,0.25)" />
+                <rect x="16" y="13" width="3.5" height="3.5" rx="0.5" fill="rgba(10,74,138,0.25)" />
+              </svg>
+              {!accountSetupDone && (
+                <span
+                  aria-label="Account setup needed"
+                  style={{
+                    position: "absolute", top: -2, right: -2,
+                    minWidth: 14, height: 14, padding: "0 4px",
+                    background: "#ef4444", color: "#fff",
+                    border: "2px solid #1a8fd1", borderRadius: 999,
+                    fontSize: 9, fontWeight: 700,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    lineHeight: 1, fontFamily: "'Open Sans', sans-serif",
+                  }}
+                >
+                  !
+                </span>
+              )}
+            </button>
           </div>
         </div>
       </nav>
@@ -452,6 +481,16 @@ export function App() {
 
       {openListing && (
         <ListingDetailsModal listing={openListing} onClose={() => setOpenListing(null)} />
+      )}
+
+      {createAccountOpen && (
+        <CreateAccountWizard
+          onClose={() => setCreateAccountOpen(false)}
+          onComplete={(d) => {
+            console.log("[signup] new account:", d);
+            setAccountSetupDone(saveFlag("legacy-account-setup-done", true));
+          }}
+        />
       )}
 
       {popup && (
