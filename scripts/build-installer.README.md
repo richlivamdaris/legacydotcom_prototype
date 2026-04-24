@@ -39,8 +39,13 @@ Useful flags:
 ## Output
 
 ```
-dist-installer\FuneralHomePrototype-Setup-0.1.0.exe   (~80–150 MB)
+dist-installer\FuneralHomePrototype-Setup-<version>.exe   (~80–150 MB)
 ```
+
+`<version>` is read from the root `package.json` at build time. Bump that
+file and re-run; everything (the .exe filename, the README banner inside
+the install folder, and the standalone API `package.json` in the staged
+payload) follows from that single source.
 
 Ship that single file to the target PC. The installer is self-contained — no
 extra downloads during installation beyond the pre-install internet check.
@@ -85,7 +90,7 @@ PIDs for both processes are written to
   loudly if `STRIPE_SECRET_KEY` does not start with `sk_test_`.
 - The installer is unsigned. Windows SmartScreen will warn on first run —
   users must click "More info" → "Run anyway". Code-signing is out of scope
-  for v0.1.0 but recommended for any wider distribution.
+  for the prototype but recommended for any wider distribution.
 
 ## Cleaning up
 

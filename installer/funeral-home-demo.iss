@@ -4,7 +4,13 @@
 
 #define MyAppName "Funeral Home Prototype Stripe Integration"
 #define MyAppShortName "Funeral Home Prototype"
-#define MyAppVersion "0.1.0"
+; MyAppVersion is normally injected by scripts\build-installer.ps1 via
+;   iscc /DMyAppVersion=<root package.json version> ...
+; Keep a sane fallback so a bare `iscc installer\funeral-home-demo.iss`
+; still compiles for ad-hoc tweaks.
+#ifndef MyAppVersion
+  #define MyAppVersion "1.0.0"
+#endif
 #define MyAppPublisher "Insight AI / Legacy.com"
 #define MyAppURL "http://localhost:3001"
 #define MyAppDataDirName "Insight AI\Funeral Home Prototype"

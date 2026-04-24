@@ -24,6 +24,16 @@ $ErrorActionPreference = 'Stop'
 
 # --- Paths -------------------------------------------------------------------
 $RepoRoot       = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+
+# Single source of truth for the app version: the root package.json.
+# Bump that file and every artifact this script produces (the standalone API
+# package.json, the README banner, and the installer filename) follows.
+$RootPkgPath = Join-Path $RepoRoot 'package.json'
+if (-not (Test-Path $RootPkgPath)) { Die "Cannot find $RootPkgPath" }
+$AppVersion = ((Get-Content $RootPkgPath -Raw | ConvertFrom-Json).version)
+if (-not $AppVersion) { Die 'Root package.json has no version field' }
+if ($AppVersion -notmatch '^\d+\.\d+\.\d+$') { Die "Root package.json version '$AppVersion' is not a valid semver MAJOR.MINOR.PATCH" }
+Write-Host "  App version: $AppVersion (from package.json)" -ForegroundColor Cyan
 $InstallerDir   = Join-Path $RepoRoot 'installer'
 $AssetsDir      = Join-Path $InstallerDir 'assets'
 $StagingDir     = Join-Path $InstallerDir 'staging'
@@ -179,7 +189,7 @@ Write-Ok 'api\dist staged'
 $apiPkgJson = Get-Content (Join-Path $RepoRoot 'apps\api\package.json') -Raw | ConvertFrom-Json
 $standalonePkg = [ordered]@{
     name         = 'funeral-home-prototype-api'
-    version      = '0.1.0'
+    version      = $AppVersion
     private      = $true
     type         = 'module'
     main         = 'dist/index.js'
@@ -214,7 +224,7 @@ Write-Ok 'launcher + app.config.ps1 staged'
 
 # README shown in the install directory
 $readme = @"
-Funeral Home Prototype Stripe Integration - v0.1.0
+Funeral Home Prototype Stripe Integration - v$AppVersion
 ===================================================
 
 To start the demo:
@@ -241,7 +251,7 @@ if ($SkipInstaller) {
 }
 
 Write-Section 'Compiling installer'
-& $Iscc $IssFile
+& $Iscc "/DMyAppVersion=$AppVersion" $IssFile
 if ($LASTEXITCODE -ne 0) { Die 'Inno Setup compilation failed' }
 
 $setupExe = Get-ChildItem -Path $OutputDir -Filter 'FuneralHomePrototype-Setup-*.exe' |
