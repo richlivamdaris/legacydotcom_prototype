@@ -35,12 +35,15 @@ function statusClass(s: MonthlyInvoiceStatus): string {
   return "badge upcoming";
 }
 
+const PAGE_SIZE = 10;
+
 export function InvoicesTab({ invoices, onRefresh, simulateError, onPayError }: Props) {
   const [filter, setFilter] = useState<Filter>("all");
   const [yearFilter, setYearFilter] = useState<string>("all");
   const [downloading, setDownloading] = useState(false);
   const [openRow, setOpenRow] = useState<MonthlyInvoiceRow | null>(null);
   const [paying, setPaying] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
 
   const years = useMemo(() => {
     const s = new Set<string>();
@@ -54,6 +57,16 @@ export function InvoicesTab({ invoices, onRefresh, simulateError, onPayError }: 
     if (yearFilter !== "all" && g.month.slice(0, 4) !== yearFilter) return false;
     return true;
   });
+
+  // Reset to page 1 whenever filters change the result set
+  useEffect(() => { setPage(1); }, [filter, yearFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pageStart = (currentPage - 1) * PAGE_SIZE;
+  const pageRows = filtered.slice(pageStart, pageStart + PAGE_SIZE);
+  const showingFrom = filtered.length === 0 ? 0 : pageStart + 1;
+  const showingTo = Math.min(pageStart + PAGE_SIZE, filtered.length);
 
   async function downloadAllPdfZip() {
     setDownloading(true);
@@ -182,7 +195,7 @@ export function InvoicesTab({ invoices, onRefresh, simulateError, onPayError }: 
           {filtered.length === 0 && (
             <tr><td colSpan={7} className="empty">No invoices match.</td></tr>
           )}
-          {filtered.map((g) => {
+          {pageRows.map((g) => {
             const isPaid = g.status === "paid";
             const amount = isPaid ? g.amountPaidUsd || g.totalAmountUsd : g.totalAmountUsd;
             return (
@@ -213,7 +226,67 @@ export function InvoicesTab({ invoices, onRefresh, simulateError, onPayError }: 
         </tbody>
       </table>
 
+      <div className="pager-row">
+        <div className="pager-info">
+          {filtered.length === 0
+            ? "0 invoices"
+            : `Showing ${showingFrom}–${showingTo} of ${filtered.length} invoice${filtered.length !== 1 ? "s" : ""}`}
+        </div>
+        <Pager current={currentPage} totalPages={totalPages} onChange={setPage} />
+      </div>
+
       {openRow && <MonthBreakdownModal row={openRow} onClose={() => setOpenRow(null)} />}
+    </div>
+  );
+}
+
+function Pager({ current, totalPages, onChange }: { current: number; totalPages: number; onChange: (p: number) => void }) {
+  if (totalPages <= 1) return <div className="pager-controls" />;
+
+  // Show: 1, current-1, current, current+1, total — with ellipsis in the gaps.
+  const items: Array<number | "…"> = [];
+  for (let p = 1; p <= totalPages; p++) {
+    if (p === 1 || p === totalPages || (p >= current - 1 && p <= current + 1)) {
+      items.push(p);
+    } else if (items[items.length - 1] !== "…") {
+      items.push("…");
+    }
+  }
+
+  return (
+    <div className="pager-controls">
+      <button
+        type="button"
+        className="pager-btn"
+        disabled={current === 1}
+        aria-label="Previous page"
+        onClick={() => onChange(current - 1)}
+      >
+        ‹
+      </button>
+      {items.map((it, idx) =>
+        it === "…" ? (
+          <span key={`e${idx}`} className="pager-ellipsis">…</span>
+        ) : (
+          <button
+            key={it}
+            type="button"
+            className={`pager-btn${it === current ? " active" : ""}`}
+            onClick={() => onChange(it)}
+          >
+            {it}
+          </button>
+        )
+      )}
+      <button
+        type="button"
+        className="pager-btn"
+        disabled={current === totalPages}
+        aria-label="Next page"
+        onClick={() => onChange(current + 1)}
+      >
+        ›
+      </button>
     </div>
   );
 }

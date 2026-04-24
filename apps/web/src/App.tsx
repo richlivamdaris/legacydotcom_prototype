@@ -14,7 +14,7 @@ import { ServiceFeesTab } from "./features/dashboard/ServiceFeesTab.js";
 import { NewObituaryModal } from "./features/dashboard/NewObituaryModal.js";
 import { RedeemModal } from "./features/dashboard/RedeemModal.js";
 import { CartDrawer, type CartItem } from "./features/dashboard/CartDrawer.js";
-import { TAB_MODE_KEY } from "./features/dashboard/paymentPopup.js";
+import { TAB_MODE_KEY, tabModeEnabled } from "./features/dashboard/paymentPopup.js";
 
 type TabName = "overview" | "invoices" | "listings" | "loyalty" | "service-fees";
 
@@ -41,7 +41,7 @@ export function App() {
   const [admin, setAdmin] = useState<boolean>(() => readFlag("legacy-admin"));
   const [freeze, setFreeze] = useState<boolean>(() => readFlag("legacy-freeze"));
   const [simulateError, setSimulateError] = useState<boolean>(() => readFlag("legacy-sim-error"));
-  const [tabMode, setTabMode] = useState<boolean>(() => readFlag(TAB_MODE_KEY));
+  const [tabMode, setTabMode] = useState<boolean>(() => tabModeEnabled());
   const [popup, setPopup] = useState<{ title: string; body: string; tone: "warn" | "error" | "info" } | null>(null);
 
   const [cartOpen, setCartOpen] = useState(false);
@@ -146,10 +146,10 @@ export function App() {
 
   return (
     <>
-      {/* Solid blue nav — logo left, cart + admin + avatar right */}
+      {/* Solid blue nav — brand left, Insight AI logo center, cart + admin + avatar right */}
       <nav style={{ background: "#1a8fd1", height: 72, position: "sticky", top: 0, zIndex: 100 }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 2rem", display: "flex", alignItems: "center", justifyContent: "space-between", height: "100%" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 2rem", display: "grid", gridTemplateColumns: "1fr auto 1fr", alignItems: "center", height: "100%", gap: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, justifySelf: "start" }}>
             <div style={{ fontSize: 22, fontWeight: 700, color: "#fff", letterSpacing: "-0.5px", lineHeight: 1 }}>
               app<span style={{ color: "rgba(255,255,255,0.6)" }}>.</span>
             </div>
@@ -157,7 +157,51 @@ export function App() {
               powered by Obituaries.com
             </div>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+
+          <div style={{ justifySelf: "center", display: "flex", alignItems: "center", gap: 10, background: "#fff", borderRadius: 22, padding: "6px 14px 6px 16px", boxShadow: "0 2px 10px rgba(0,0,0,0.12)" }}>
+            <div style={{ display: "flex", alignItems: "baseline", fontFamily: "'Open Sans', sans-serif", fontWeight: 800, fontSize: 18, letterSpacing: "-0.5px", lineHeight: 1 }}>
+              <span style={{ color: "#1a1a1a" }}>Insight</span>
+              <span
+                style={{
+                  marginLeft: 4,
+                  background: "linear-gradient(90deg, #6f5cff 0%, #c64bd6 60%, #ff5fa0 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                  color: "transparent",
+                }}
+              >
+                AI
+              </span>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" style={{ marginLeft: 3, transform: "translateY(-7px)" }} aria-hidden="true">
+                <defs>
+                  <linearGradient id="iai-spark" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="#6f5cff" />
+                    <stop offset="60%" stopColor="#c64bd6" />
+                    <stop offset="100%" stopColor="#ff5fa0" />
+                  </linearGradient>
+                </defs>
+                <path d="M12 2 L13.6 8.4 L20 10 L13.6 11.6 L12 18 L10.4 11.6 L4 10 L10.4 8.4 Z" fill="url(#iai-spark)" />
+              </svg>
+            </div>
+            <span
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                color: "#6f5cff",
+                background: "#f2eeff",
+                border: "1px solid #ddd5ff",
+                borderRadius: 999,
+                padding: "2px 8px",
+                lineHeight: 1.2,
+                letterSpacing: "0.02em",
+              }}
+            >
+              v1.0
+            </span>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 16, justifySelf: "end" }}>
             <button
               type="button"
               onClick={toggleTabMode}

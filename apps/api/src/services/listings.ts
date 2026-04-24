@@ -206,6 +206,78 @@ const SEED_LISTINGS: CreateListingInput[] = [
   { deceasedName: "Seraphina Q. Underwood", newspapers: ["Hartford Courant"], publicationDate: "2025-11-26", amountUsd: 148.0, dateOfDeath: daysBeforeIso("2025-11-26", 5), obituaryText: GENERIC_OBIT("Seraphina Q. Underwood", "Hartford") },
   { deceasedName: "Percival M. Whitfield", newspapers: ["New Haven Register"], publicationDate: "2025-11-18", amountUsd: 92.0, dateOfDeath: daysBeforeIso("2025-11-18", 3), obituaryText: GENERIC_OBIT("Percival M. Whitfield", "New Haven") },
 
+  // October 2025
+  { deceasedName: "Octavia M. Rutherford", newspapers: ["Hartford Courant"], publicationDate: "2025-10-24", amountUsd: 134.0, dateOfDeath: daysBeforeIso("2025-10-24", 4), obituaryText: GENERIC_OBIT("Octavia M. Rutherford", "Hartford") },
+  { deceasedName: "Desmond R. Farleigh", newspapers: ["Connecticut Post"], publicationDate: "2025-10-15", amountUsd: 102.0, dateOfDeath: daysBeforeIso("2025-10-15", 3), obituaryText: GENERIC_OBIT("Desmond R. Farleigh", "Bridgeport") },
+
+  // September 2025
+  { deceasedName: "Gwendolyn F. Applebaum", newspapers: ["New Haven Register"], publicationDate: "2025-09-22", amountUsd: 98.0, dateOfDeath: daysBeforeIso("2025-09-22", 5), obituaryText: GENERIC_OBIT("Gwendolyn F. Applebaum", "New Haven") },
+  { deceasedName: "Silas H. Brentwood", newspapers: ["Washington Post"], publicationDate: "2025-09-11", amountUsd: 3950.0, dateOfDeath: daysBeforeIso("2025-09-11", 4), obituaryText: GENERIC_OBIT("Silas H. Brentwood", "Washington") },
+
+  // August 2025
+  { deceasedName: "Rosalind T. Edgecombe", newspapers: ["Hartford Courant"], publicationDate: "2025-08-28", amountUsd: 146.0, paymentMode: "invoice", dateOfDeath: daysBeforeIso("2025-08-28", 6), obituaryText: GENERIC_OBIT("Rosalind T. Edgecombe", "Hartford") },
+  { deceasedName: "Montgomery L. Saxton", newspapers: ["New York Times"], publicationDate: "2025-08-14", amountUsd: 7540.0, dateOfDeath: daysBeforeIso("2025-08-14", 5), obituaryText: GENERIC_OBIT("Montgomery L. Saxton", "New York") },
+
+  // July 2025
+  { deceasedName: "Imogen B. Castellano", newspapers: ["Connecticut Post"], publicationDate: "2025-07-25", amountUsd: 108.0, dateOfDeath: daysBeforeIso("2025-07-25", 3), obituaryText: GENERIC_OBIT("Imogen B. Castellano", "Bridgeport") },
+  { deceasedName: "Theodore W. Arbuthnot", newspapers: ["Hartford Courant"], publicationDate: "2025-07-12", amountUsd: 142.0, dateOfDeath: daysBeforeIso("2025-07-12", 4), obituaryText: GENERIC_OBIT("Theodore W. Arbuthnot", "Hartford") },
+
+  // June 2025
+  { deceasedName: "Philomena R. Oakhurst", newspapers: ["New Haven Register"], publicationDate: "2025-06-26", amountUsd: 96.0, dateOfDeath: daysBeforeIso("2025-06-26", 5), obituaryText: GENERIC_OBIT("Philomena R. Oakhurst", "New Haven") },
+  { deceasedName: "Wendell M. Forsythe", newspapers: ["Hartford Courant"], publicationDate: "2025-06-14", amountUsd: 138.0, dateOfDeath: daysBeforeIso("2025-06-14", 3), obituaryText: GENERIC_OBIT("Wendell M. Forsythe", "Hartford") },
+
+  // May 2025
+  { deceasedName: "Cassandra N. Blackmoor", newspapers: ["Washington Post"], publicationDate: "2025-05-22", amountUsd: 4180.0, paymentMode: "invoice", dateOfDeath: daysBeforeIso("2025-05-22", 4), obituaryText: GENERIC_OBIT("Cassandra N. Blackmoor", "Washington") },
+  { deceasedName: "Barnaby J. Westerfield", newspapers: ["Connecticut Post"], publicationDate: "2025-05-09", amountUsd: 104.0, dateOfDeath: daysBeforeIso("2025-05-09", 5), obituaryText: GENERIC_OBIT("Barnaby J. Westerfield", "Bridgeport") },
+
+  // April 2025
+  { deceasedName: "Henrietta P. Larkspur", newspapers: ["Hartford Courant"], publicationDate: "2025-04-28", amountUsd: 150.0, dateOfDeath: daysBeforeIso("2025-04-28", 3), obituaryText: GENERIC_OBIT("Henrietta P. Larkspur", "Hartford") },
+  { deceasedName: "Cornelius D. Marchmont", newspapers: ["New York Times"], publicationDate: "2025-04-14", amountUsd: 8120.0, dateOfDeath: daysBeforeIso("2025-04-14", 5), obituaryText: GENERIC_OBIT("Cornelius D. Marchmont", "New York") },
+
+  // March 2025
+  { deceasedName: "Lavinia S. Quartermaine", newspapers: ["New Haven Register"], publicationDate: "2025-03-20", amountUsd: 94.0, dateOfDeath: daysBeforeIso("2025-03-20", 4), obituaryText: GENERIC_OBIT("Lavinia S. Quartermaine", "New Haven") },
+  { deceasedName: "Augustus T. Pembridge", newspapers: ["Hartford Courant"], publicationDate: "2025-03-07", amountUsd: 144.0, dateOfDeath: daysBeforeIso("2025-03-07", 6), obituaryText: GENERIC_OBIT("Augustus T. Pembridge", "Hartford") },
+
+  // February 2025
+  { deceasedName: "Prudence E. Halliwell", newspapers: ["Connecticut Post"], publicationDate: "2025-02-24", amountUsd: 106.0, dateOfDeath: daysBeforeIso("2025-02-24", 3), obituaryText: GENERIC_OBIT("Prudence E. Halliwell", "Bridgeport") },
+  { deceasedName: "Ezekiel B. Thornbury", newspapers: ["Hartford Courant"], publicationDate: "2025-02-11", amountUsd: 140.0, dateOfDeath: daysBeforeIso("2025-02-11", 5), obituaryText: GENERIC_OBIT("Ezekiel B. Thornbury", "Hartford") },
+
+  // January 2025
+  { deceasedName: "Winifred A. Sommerset", newspapers: ["Washington Post"], publicationDate: "2025-01-22", amountUsd: 3720.0, dateOfDeath: daysBeforeIso("2025-01-22", 4), obituaryText: GENERIC_OBIT("Winifred A. Sommerset", "Washington") },
+  { deceasedName: "Reginald K. Gainsborough", newspapers: ["New Haven Register"], publicationDate: "2025-01-09", amountUsd: 98.0, dateOfDeath: daysBeforeIso("2025-01-09", 6), obituaryText: GENERIC_OBIT("Reginald K. Gainsborough", "New Haven") },
+
+  // December 2024
+  { deceasedName: "Clementine V. Hartwell", newspapers: ["Hartford Courant"], publicationDate: "2024-12-27", amountUsd: 156.0, paymentMode: "invoice", dateOfDeath: daysBeforeIso("2024-12-27", 3), obituaryText: GENERIC_OBIT("Clementine V. Hartwell", "Hartford") },
+  { deceasedName: "Obadiah F. Strickland", newspapers: ["Connecticut Post"], publicationDate: "2024-12-15", amountUsd: 110.0, dateOfDeath: daysBeforeIso("2024-12-15", 4), obituaryText: GENERIC_OBIT("Obadiah F. Strickland", "Bridgeport") },
+
+  // November 2024
+  { deceasedName: "Georgiana M. Pennyworth", newspapers: ["New York Times"], publicationDate: "2024-11-25", amountUsd: 6840.0, dateOfDeath: daysBeforeIso("2024-11-25", 5), obituaryText: GENERIC_OBIT("Georgiana M. Pennyworth", "New York") },
+  { deceasedName: "Hezekiah P. Crestwood", newspapers: ["Hartford Courant"], publicationDate: "2024-11-13", amountUsd: 148.0, dateOfDeath: daysBeforeIso("2024-11-13", 4), obituaryText: GENERIC_OBIT("Hezekiah P. Crestwood", "Hartford") },
+
+  // October 2024
+  { deceasedName: "Isadora T. Havisham", newspapers: ["New Haven Register"], publicationDate: "2024-10-28", amountUsd: 92.0, dateOfDeath: daysBeforeIso("2024-10-28", 3), obituaryText: GENERIC_OBIT("Isadora T. Havisham", "New Haven") },
+  { deceasedName: "Percival J. Lockwood", newspapers: ["Washington Post"], publicationDate: "2024-10-11", amountUsd: 4290.0, dateOfDeath: daysBeforeIso("2024-10-11", 5), obituaryText: GENERIC_OBIT("Percival J. Lockwood", "Washington") },
+
+  // September 2024
+  { deceasedName: "Ophelia R. Wentworth", newspapers: ["Hartford Courant"], publicationDate: "2024-09-24", amountUsd: 142.0, dateOfDeath: daysBeforeIso("2024-09-24", 4), obituaryText: GENERIC_OBIT("Ophelia R. Wentworth", "Hartford") },
+  { deceasedName: "Mortimer D. Ashfield", newspapers: ["Connecticut Post"], publicationDate: "2024-09-10", amountUsd: 108.0, dateOfDeath: daysBeforeIso("2024-09-10", 6), obituaryText: GENERIC_OBIT("Mortimer D. Ashfield", "Bridgeport") },
+
+  // August 2024
+  { deceasedName: "Temperance B. Kingsley", newspapers: ["Hartford Courant"], publicationDate: "2024-08-22", amountUsd: 152.0, dateOfDeath: daysBeforeIso("2024-08-22", 3), obituaryText: GENERIC_OBIT("Temperance B. Kingsley", "Hartford") },
+  { deceasedName: "Alistair N. Brockhurst", newspapers: ["New Haven Register"], publicationDate: "2024-08-09", amountUsd: 96.0, dateOfDeath: daysBeforeIso("2024-08-09", 4), obituaryText: GENERIC_OBIT("Alistair N. Brockhurst", "New Haven") },
+
+  // July 2024
+  { deceasedName: "Matilda C. Fairweather", newspapers: ["New York Times"], publicationDate: "2024-07-25", amountUsd: 7890.0, dateOfDeath: daysBeforeIso("2024-07-25", 5), obituaryText: GENERIC_OBIT("Matilda C. Fairweather", "New York") },
+  { deceasedName: "Ambrose H. Tillington", newspapers: ["Hartford Courant"], publicationDate: "2024-07-12", amountUsd: 138.0, dateOfDeath: daysBeforeIso("2024-07-12", 4), obituaryText: GENERIC_OBIT("Ambrose H. Tillington", "Hartford") },
+
+  // June 2024
+  { deceasedName: "Drusilla E. Whitmarsh", newspapers: ["Connecticut Post"], publicationDate: "2024-06-27", amountUsd: 104.0, dateOfDeath: daysBeforeIso("2024-06-27", 3), obituaryText: GENERIC_OBIT("Drusilla E. Whitmarsh", "Bridgeport") },
+  { deceasedName: "Ignatius P. Rothermere", newspapers: ["Hartford Courant"], publicationDate: "2024-06-14", amountUsd: 146.0, dateOfDeath: daysBeforeIso("2024-06-14", 6), obituaryText: GENERIC_OBIT("Ignatius P. Rothermere", "Hartford") },
+
+  // May 2024
+  { deceasedName: "Evangeline S. Pemberton", newspapers: ["Washington Post"], publicationDate: "2024-05-24", amountUsd: 3980.0, paymentMode: "invoice", dateOfDeath: daysBeforeIso("2024-05-24", 4), obituaryText: GENERIC_OBIT("Evangeline S. Pemberton", "Washington") },
+  { deceasedName: "Thaddeus R. Oakenshield", newspapers: ["New Haven Register"], publicationDate: "2024-05-11", amountUsd: 92.0, dateOfDeath: daysBeforeIso("2024-05-11", 5), obituaryText: GENERIC_OBIT("Thaddeus R. Oakenshield", "New Haven") },
+
   // Pending — submitted but no publication date scheduled yet
   { deceasedName: "Mildred A. Pendleton", newspapers: ["Hartford Courant"], publicationDate: null, amountUsd: 138.0, dateOfDeath: daysBeforeIso("2026-04-20", 2), obituaryText: GENERIC_OBIT("Mildred A. Pendleton", "Hartford") },
   { deceasedName: "Oscar B. Tremayne", newspapers: ["New Haven Register"], publicationDate: null, amountUsd: 96.0, dateOfDeath: daysBeforeIso("2026-04-19", 3), obituaryText: GENERIC_OBIT("Oscar B. Tremayne", "New Haven") },
@@ -213,7 +285,7 @@ const SEED_LISTINGS: CreateListingInput[] = [
 
 // Bump this when the seed/data model changes in a breaking way so startup
 // knows to wipe the store and re-seed.
-const SEED_VERSION = 4;
+const SEED_VERSION = 5;
 
 export async function ensureSeeded(): Promise<void> {
   const { readFile, unlink } = await import("node:fs/promises");

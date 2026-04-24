@@ -14,9 +14,12 @@ export interface PopupResult {
   blocked: boolean;
 }
 
-function tabModeEnabled(): boolean {
-  if (typeof window === "undefined") return false;
-  return window.localStorage.getItem(TAB_MODE_KEY) === "1";
+// Tab mode defaults to ON — only "0" disables it. A missing or unrecognised
+// value still resolves to tab mode so the demo works out-of-the-box without
+// the user having to flip the toggle.
+export function tabModeEnabled(): boolean {
+  if (typeof window === "undefined") return true;
+  return window.localStorage.getItem(TAB_MODE_KEY) !== "0";
 }
 
 export function openPaymentPopup(url: string): Promise<PopupResult> {
@@ -24,6 +27,7 @@ export function openPaymentPopup(url: string): Promise<PopupResult> {
     window.open(url, "_blank", "noopener,noreferrer");
     return Promise.resolve({ closed: false, blocked: false });
   }
+
 
   const features = "width=820,height=760,menubar=no,toolbar=no,location=yes,status=no,resizable=yes,scrollbars=yes";
   const win = window.open(url, "legacy-stripe-payment", features);

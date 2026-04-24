@@ -1430,14 +1430,14 @@ body {
 .pager-row {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   padding: 14px 12px;
   border-top: 1px solid #f0f3f7;
   margin-top: 4px;
   gap: 12px;
   flex-wrap: wrap;
 }
-.pager-info { display: none; }
+.pager-info { font-size: 13px; color: #888; }
 .pager-controls { display: flex; gap: 4px; align-items: center; }
 .pager-btn {
   font-family: 'Open Sans', sans-serif;
