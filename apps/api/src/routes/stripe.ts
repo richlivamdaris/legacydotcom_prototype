@@ -1,7 +1,7 @@
 import { Router } from "express";
 import JSZip from "jszip";
 import { getInvoice, listRecentInvoices } from "../services/invoicing.js";
-import { baseMonthOf, getListings, getMonthlyInvoices, saveListings, type MonthlyInvoiceRecord } from "../services/store.js";
+import { getListings, getMonthlyInvoices, saveListings, type MonthlyInvoiceRecord } from "../services/store.js";
 import { stripe } from "../services/stripe.js";
 import { finalizeMonthlyInvoice } from "../services/monthly.js";
 
@@ -43,15 +43,13 @@ stripeRouter.get("/invoices", async (_req, res) => {
           amountPaidUsd = 0;
         }
 
-        const isSupplement = m.month.includes(":s");
-        const [y, mo] = baseMonthOf(m.month).split("-");
+        const [y, mo] = m.month.split("-");
         const year = Number(y);
         const monthIdx = Number(mo) - 1;
         const due = new Date(Date.UTC(year, monthIdx + 1, 1));
         const dueDate = due.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
         const period = due.toLocaleDateString("en-US", { month: "long", year: "numeric" }); // "May 2026" → but we want the month OF the listings
-        const periodBase = new Date(Date.UTC(year, monthIdx, 1)).toLocaleDateString("en-US", { month: "long", year: "numeric" });
-        const periodLabel = isSupplement ? `${periodBase} · top-up` : periodBase;
+        const periodLabel = new Date(Date.UTC(year, monthIdx, 1)).toLocaleDateString("en-US", { month: "long", year: "numeric" });
 
         const listingSummaries = m.listingIds
           .map((id) => listings.find((l) => l.id === id))
@@ -103,7 +101,7 @@ stripeRouter.get("/invoices", async (_req, res) => {
 stripeRouter.post("/invoices/month/:month/pay", async (req, res) => {
   try {
     const month = req.params.month;
-    if (!/^\d{4}-\d{2}(:s\d+)?$/.test(month)) return res.status(400).json({ error: "month must be YYYY-MM or YYYY-MM:sN" });
+    if (!/^\d{4}-\d{2}$/.test(month)) return res.status(400).json({ error: "month must be YYYY-MM" });
     const rec = await finalizeMonthlyInvoice(month);
     return res.json({
       stripeInvoiceId: rec.stripeInvoiceId,

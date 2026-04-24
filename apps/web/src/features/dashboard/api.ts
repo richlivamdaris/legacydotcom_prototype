@@ -193,6 +193,34 @@ export async function redeemPoints(input: RedeemInput): Promise<RedeemResult> {
   return parseOrThrow<RedeemResult>(res);
 }
 
+export interface CheckoutResult {
+  listingId: string;
+  hostedInvoiceUrl: string | null;
+  status: string;
+}
+
+export async function checkoutListings(
+  listingIds: string[],
+  mode: "add_to_invoice" | "pay_now",
+): Promise<CheckoutResult[]> {
+  const res = await fetch("/api/listings/checkout", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ listingIds, mode }),
+  });
+  const data = await parseOrThrow<{ results: CheckoutResult[] }>(res);
+  return data.results;
+}
+
+export async function grantLoyaltyPoints(points: number, note?: string): Promise<{ points: number; granted: number }> {
+  const res = await fetch("/api/loyalty/admin/grant", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ points, note }),
+  });
+  return parseOrThrow<{ points: number; granted: number }>(res);
+}
+
 export async function fetchServiceFees(): Promise<ServiceFeePartner[]> {
   const res = await fetch("/api/service-fees");
   const data = await parseOrThrow<{ partners: ServiceFeePartner[] }>(res);

@@ -4,6 +4,7 @@ import {
   fetchInvoices,
   fetchListings,
   fetchLoyalty,
+  grantLoyaltyPoints,
   syncListings,
 } from "./features/dashboard/api.js";
 import { OverviewTab } from "./features/dashboard/OverviewTab.js";
@@ -14,6 +15,7 @@ import { ServiceFeesTab } from "./features/dashboard/ServiceFeesTab.js";
 import { NewObituaryModal } from "./features/dashboard/NewObituaryModal.js";
 import { RedeemModal } from "./features/dashboard/RedeemModal.js";
 import { CartDrawer, type CartItem } from "./features/dashboard/CartDrawer.js";
+import { CheckoutPage } from "./features/dashboard/CheckoutPage.js";
 import { TAB_MODE_KEY, tabModeEnabled } from "./features/dashboard/paymentPopup.js";
 import { CreateAccountWizard } from "./features/signup/CreateAccountWizard.js";
 import { ProfileDrawer } from "./features/profile/ProfileDrawer.js";
@@ -47,6 +49,7 @@ export function App() {
   const [popup, setPopup] = useState<{ title: string; body: string; tone: "warn" | "error" | "info" } | null>(null);
 
   const [cartOpen, setCartOpen] = useState(false);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [openListing, setOpenListing] = useState<Listing | null>(null);
   const [editingListing, setEditingListing] = useState<Listing | null>(null);
@@ -70,6 +73,21 @@ export function App() {
 
   function payOverdueAndUnlock() {
     setAccountOverdue(saveFlag("legacy-account-overdue", false));
+  }
+
+  const [grantingPoints, setGrantingPoints] = useState(false);
+  async function adjustPoints(delta: number) {
+    if (grantingPoints) return;
+    setGrantingPoints(true);
+    try {
+      const note = delta >= 0 ? `Admin bonus (+${delta})` : `Admin deduction (${delta})`;
+      await grantLoyaltyPoints(delta, note);
+      setLoyalty(await fetchLoyalty());
+    } catch (err) {
+      alert("Could not adjust points: " + (err instanceof Error ? err.message : String(err)));
+    } finally {
+      setGrantingPoints(false);
+    }
   }
 
   function handleNewObit() {
@@ -114,6 +132,7 @@ export function App() {
           friendlyId: listing.friendlyInvoiceId,
           deceasedName: listing.deceasedName,
           newspaper: listing.newspaper,
+          publicationDate: listing.publicationDate,
           amountUsd: listing.amountUsd,
           hostedInvoiceUrl: null,
           billingPartner: listing.billingPartner,
@@ -384,10 +403,20 @@ export function App() {
         items={cart}
         onClose={() => setCartOpen(false)}
         onRemove={removeFromCart}
-        onClear={() => setCart([])}
-        onAllPaid={onCartAllPaid}
-        onPopupBlocked={onPopupBlocked}
+        onCheckout={() => { setCartOpen(false); setCheckoutOpen(true); }}
       />
+
+      {checkoutOpen && (
+        <CheckoutPage
+          items={cart}
+          onBack={() => setCheckoutOpen(false)}
+          onPlaced={async () => {
+            setCart([]);
+            await onCartAllPaid();
+          }}
+          onPopupBlocked={onPopupBlocked}
+        />
+      )}
 
       {openListing && (
         <ListingDetailsModal listing={openListing} onClose={() => setOpenListing(null)} />
@@ -442,20 +471,50 @@ export function App() {
           {accountOverdue ? "Overdue: ON" : "Toggle overdue"}
         </StackBtn>
 
-        {/* Open-in-tab mode (Stripe invoice / onboarding window) */}
-        <StackBtn
-          onClick={toggleTabMode}
-          active={tabMode}
-          activeColor="#16a34a"
-          activeHover="#15803d"
-          activeBg="#dcfce7"
-          title={tabMode
-            ? "Stripe invoices open in a new tab — click to switch to popup window"
-            : "Stripe invoices open in a popup window — click to switch to new tab"}
-          icon={<span style={{ fontSize: 11, lineHeight: 1 }}>{tabMode ? "⇱" : "⧉"}</span>}
-        >
-          {tabMode ? "Open in: Tab" : "Open in: Popup"}
-        </StackBtn>
+        {/* Admin-only: Open-in-tab mode (Stripe invoice / onboarding window) */}
+        {admin && (
+          <StackBtn
+            onClick={toggleTabMode}
+            active={tabMode}
+            activeColor="#16a34a"
+            activeHover="#15803d"
+            activeBg="#dcfce7"
+            title={tabMode
+              ? "Stripe invoices open in a new tab — click to switch to popup window"
+              : "Stripe invoices open in a popup window — click to switch to new tab"}
+            icon={<span style={{ fontSize: 11, lineHeight: 1 }}>{tabMode ? "⇱" : "⧉"}</span>}
+          >
+            {tabMode ? "Open in: Tab" : "Open in: Popup"}
+          </StackBtn>
+        )}
+
+        {/* Admin-only: +500 loyalty points (demo grant) */}
+        {admin && (
+          <StackBtn
+            onClick={() => void adjustPoints(500)}
+            active={false}
+            activeColor="#7c3aed"
+            activeHover="#6d28d9"
+            title="Admin: add 500 points to the loyalty balance"
+            icon={<span style={{ fontSize: 11, lineHeight: 1 }}>★</span>}
+          >
+            {grantingPoints ? "Adjusting…" : "+500 pts"}
+          </StackBtn>
+        )}
+
+        {/* Admin-only: -500 loyalty points (demo deduction) */}
+        {admin && (
+          <StackBtn
+            onClick={() => void adjustPoints(-500)}
+            active={false}
+            activeColor="#7c3aed"
+            activeHover="#6d28d9"
+            title="Admin: deduct 500 points from the loyalty balance (floors at 0)"
+            icon={<span style={{ fontSize: 11, lineHeight: 1 }}>☆</span>}
+          >
+            {grantingPoints ? "Adjusting…" : "−500 pts"}
+          </StackBtn>
+        )}
 
         {/* Admin-only: Freeze */}
         {admin && (
@@ -552,7 +611,7 @@ export function App() {
               letterSpacing: "0.02em",
             }}
           >
-            v1.2
+            v1.3
           </span>
         </a>
       </div>

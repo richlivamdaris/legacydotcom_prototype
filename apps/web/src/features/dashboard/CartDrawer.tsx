@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { formatCurrency } from "./shared.js";
-import { openPaymentPopup } from "./paymentPopup.js";
 
 export interface CartItem {
   invoiceId: string;
   friendlyId: string;
   deceasedName: string;
   newspaper: string;
+  publicationDate: string | null;
   amountUsd: number;
   hostedInvoiceUrl: string | null;
   billingPartner: boolean;
@@ -17,158 +17,210 @@ interface Props {
   items: CartItem[];
   onClose: () => void;
   onRemove: (invoiceId: string) => void;
-  onClear: () => void;
-  onAllPaid: () => Promise<void> | void;
-  onPopupBlocked?: () => void;
+  onCheckout: () => void;
 }
 
-export function CartDrawer({ open, items, onClose, onRemove, onClear, onAllPaid, onPopupBlocked }: Props) {
-  const [payIndex, setPayIndex] = useState<number | null>(null);
-  const paying = payIndex !== null;
+function formatPubDate(iso: string | null): string {
+  if (!iso) return "Draft — no date yet";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+}
 
+export function CartDrawer({ open, items, onClose, onRemove, onCheckout }: Props) {
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape" && !paying) onClose(); };
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     if (open) document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [open, onClose, paying]);
+  }, [open, onClose]);
 
-  async function payAll() {
-    let blockedAny = false;
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
-      if (!item.hostedInvoiceUrl) continue;
-      setPayIndex(i);
-      const result = await openPaymentPopup(item.hostedInvoiceUrl);
-      if (result.blocked) blockedAny = true;
-    }
-    setPayIndex(null);
-    if (blockedAny && onPopupBlocked) onPopupBlocked();
-    await onAllPaid();
-  }
-
+  const count = items.length;
   const total = items.reduce((s, i) => s + i.amountUsd, 0);
-  const partnerCount = items.filter((i) => i.billingPartner).length;
-  const nonPartnerCount = items.length - partnerCount;
+  const partnerBilled = 0; // Reserved — billing partners invoice the FH directly outside our cart
 
   return (
     <>
       <div
-        style={{
-          position: "fixed",
-          inset: 0,
-          background: "rgba(0,0,0,0.45)",
-          zIndex: 1800,
-          opacity: open ? 1 : 0,
-          pointerEvents: open ? "auto" : "none",
-          transition: "opacity 0.2s",
-        }}
         onClick={onClose}
+        style={{
+          position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
+          background: "rgba(0,0,0,0.4)", zIndex: 5000,
+          display: open ? "block" : "none",
+        }}
       />
       <aside
+        onClick={(e) => e.stopPropagation()}
         style={{
-          position: "fixed",
-          top: 0,
+          position: "fixed", top: 0,
           right: open ? 0 : -460,
-          width: 440,
-          maxWidth: "90vw",
-          height: "100vh",
-          background: "#fff",
-          zIndex: 1900,
-          boxShadow: "-10px 0 30px rgba(0,0,0,0.12)",
-          transition: "right 0.25s ease",
-          display: "flex",
-          flexDirection: "column",
+          width: 440, maxWidth: "100vw", height: "100%",
+          background: "#fff", zIndex: 5001,
+          boxShadow: "-4px 0 24px rgba(0,0,0,0.12)",
+          display: "flex", flexDirection: "column",
+          transition: "right 0.3s ease",
+          fontFamily: "'Open Sans', sans-serif",
         }}
       >
-        <div style={{ background: "linear-gradient(135deg, #1a8fd1 0%, #0a4a8a 100%)", color: "#fff", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div>
-            <div style={{ fontSize: 17, fontWeight: 700 }}>🛒 Pay invoices together</div>
-            <div style={{ fontSize: 12, opacity: 0.85, marginTop: 2 }}>
-              {items.length} item{items.length !== 1 ? "s" : ""}
-              {partnerCount > 0 && `  ·  ${partnerCount} billing partner`}
-              {nonPartnerCount > 0 && `  ·  ${nonPartnerCount} other`}
-            </div>
+        {/* Header */}
+        <div style={{
+          background: "#1a8fd1", padding: "0 1.5rem", height: 72,
+          display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="8" cy="21" r="1" />
+              <circle cx="19" cy="21" r="1" />
+              <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+            </svg>
+            <span style={{ fontSize: 16, fontWeight: 700, color: "#fff" }}>Obituary Cart</span>
+            <span style={{
+              background: "rgba(255,255,255,0.2)", borderRadius: 20,
+              padding: "2px 10px", fontSize: 12, fontWeight: 700, color: "#fff",
+            }}>
+              {count} item{count !== 1 ? "s" : ""}
+            </span>
           </div>
           <button
             type="button"
             onClick={onClose}
-            style={{ background: "rgba(255,255,255,0.2)", border: "none", color: "#fff", borderRadius: "50%", width: 32, height: 32, fontSize: 16, cursor: "pointer" }}
+            style={{
+              background: "rgba(255,255,255,0.2)", border: "none", borderRadius: "50%",
+              width: 32, height: 32, color: "#fff", cursor: "pointer",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}
           >
-            ✕
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 6 6 18" />
+              <path d="m6 6 12 12" />
+            </svg>
           </button>
         </div>
 
-        <div style={{ flex: 1, overflowY: "auto", padding: 14 }}>
-          {items.length === 0 ? (
-            <div className="empty">
-              <div className="empty-icon">🛒</div>
-              Your cart is empty. Go to the Invoices tab and click <strong>+ Cart</strong> next to an unpaid invoice to group payments.
+        {/* Items list */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "1.25rem 1.5rem" }}>
+          {count === 0 ? (
+            <div style={{ textAlign: "center", padding: "3rem 1rem", color: "#bbb" }}>
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ddd" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: "0 auto 16px", display: "block" }}>
+                <circle cx="8" cy="21" r="1" />
+                <circle cx="19" cy="21" r="1" />
+                <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+              </svg>
+              <div style={{ fontSize: 14, fontWeight: 600, color: "#aaa", marginBottom: 6 }}>
+                Your cart is empty
+              </div>
+              <div style={{ fontSize: 13, color: "#ccc" }}>
+                Add obituaries to checkout multiple at once
+              </div>
             </div>
           ) : (
             items.map((i) => (
-              <div key={i.invoiceId} style={{ border: "1px solid #e4e8ed", borderRadius: 10, padding: "12px 14px", marginBottom: 10, background: "#fff" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
-                  <div>
-                    <div style={{ fontWeight: 700, fontSize: 13 }}>{i.friendlyId}</div>
-                    <div style={{ fontSize: 14, color: "#1a1a1a", marginTop: 2 }}>{i.deceasedName}</div>
-                    <div style={{ fontSize: 12, color: "#888", marginTop: 2 }}>{i.newspaper}</div>
-                    {i.billingPartner && (
-                      <span style={{ display: "inline-block", fontSize: 10, fontWeight: 700, color: "#15803d", background: "#dcfce7", borderRadius: 10, padding: "2px 8px", marginTop: 4 }}>
-                        Billing partner
-                      </span>
-                    )}
+              <div key={i.invoiceId} style={{
+                background: "#fff", border: "1px solid #e4e8ed", borderRadius: 10,
+                padding: "14px 16px", marginBottom: 10,
+              }}>
+                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10, marginBottom: 10 }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "#1a1a1a", marginBottom: 2 }}>
+                      {i.deceasedName}
+                    </div>
+                    <div style={{ fontSize: 12, color: "#888" }}>
+                      {i.newspaper} &nbsp;·&nbsp; {formatPubDate(i.publicationDate)}
+                    </div>
                   </div>
-                  <div style={{ textAlign: "right" }}>
-                    <div style={{ fontWeight: 700, fontSize: 14, color: "#1a1a1a" }}>{formatCurrency(i.amountUsd)}</div>
-                    <button type="button" onClick={() => onRemove(i.invoiceId)} style={{ background: "none", border: "none", color: "#c0392b", fontSize: 11, cursor: "pointer", marginTop: 6, fontWeight: 600 }}>
-                      Remove
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => onRemove(i.invoiceId)}
+                    style={{
+                      background: "none", border: "none",
+                      cursor: "pointer",
+                      color: "#ccc", padding: 2, flexShrink: 0,
+                    }}
+                    title="Remove"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 6 6 18" />
+                      <path d="m6 6 12 12" />
+                    </svg>
+                  </button>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  {i.billingPartner ? (
+                    <span style={{ fontSize: 11, fontWeight: 700, color: "#15803d", background: "#dcfce7", borderRadius: 10, padding: "3px 10px" }}>
+                      Billing partner
+                    </span>
+                  ) : (
+                    <span style={{ fontSize: 11, fontWeight: 700, color: "#1a5f8a", background: "#e8f4fb", borderRadius: 10, padding: "3px 10px" }}>
+                      Standard billing
+                    </span>
+                  )}
+                  <span style={{ fontSize: 14, fontWeight: 700, color: "#1a1a1a" }}>
+                    {formatCurrency(i.amountUsd)}
+                  </span>
                 </div>
               </div>
             ))
           )}
         </div>
 
-        {items.length > 0 && (
-          <div style={{ borderTop: "1px solid #e4e8ed", padding: 16 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-              <span style={{ fontSize: 14, color: "#555" }}>Total</span>
-              <span style={{ fontSize: 22, fontWeight: 700, color: "#1a8fd1" }}>{formatCurrency(total)}</span>
+        {/* Footer */}
+        {count > 0 && (
+          <div style={{
+            borderTop: "1px solid #e4e8ed", padding: "1.25rem 1.5rem",
+            flexShrink: 0, background: "#fff",
+          }}>
+            {/* Summary */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: "1.25rem" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
+                <span style={{ color: "#888" }}>Obituaries in cart</span>
+                <span style={{ fontWeight: 600, color: "#1a1a1a" }}>{count}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
+                <span style={{ color: "#888" }}>Newspaper billed</span>
+                <span style={{ fontWeight: 600, color: "#888" }}>{formatCurrency(partnerBilled)}</span>
+              </div>
+              <div style={{
+                display: "flex", justifyContent: "space-between",
+                fontSize: 13, paddingTop: 8, borderTop: "1px solid #f0f3f7",
+              }}>
+                <span style={{ fontWeight: 700, color: "#1a1a1a" }}>Due today / this invoice</span>
+                <span style={{ fontWeight: 700, color: "#1a8fd1", fontSize: 16 }}>
+                  {formatCurrency(total)}
+                </span>
+              </div>
             </div>
+
+            {/* Checkout all — opens the standalone checkout page */}
             <button
               type="button"
-              onClick={() => void payAll()}
-              disabled={paying}
+              onClick={onCheckout}
               style={{
-                width: "100%",
+                width: "100%", height: 48,
+                background: "#1a8fd1",
+                color: "#fff", border: "none", borderRadius: 10,
+                fontSize: 15, fontWeight: 700, cursor: "pointer",
+                transition: "background 0.15s", marginBottom: 10,
                 fontFamily: "'Open Sans', sans-serif",
-                background: paying ? "#888" : "#1a8fd1",
-                color: "#fff",
-                border: "none",
-                borderRadius: 10,
-                padding: "14px",
-                fontSize: 15,
-                fontWeight: 700,
-                cursor: paying ? "wait" : "pointer",
-                marginBottom: 8,
+              }}
+              onMouseOver={(e) => { e.currentTarget.style.background = "#1480be"; }}
+              onMouseOut={(e) => { e.currentTarget.style.background = "#1a8fd1"; }}
+            >
+              Checkout all →
+            </button>
+
+            {/* Continue adding */}
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                width: "100%", height: 40,
+                background: "#fff", color: "#888",
+                border: "1.5px solid #e4e8ed", borderRadius: 10,
+                fontSize: 14, fontWeight: 600, cursor: "pointer",
+                fontFamily: "'Open Sans', sans-serif",
               }}
             >
-              {paying
-                ? `Paying ${payIndex! + 1} of ${items.length}…`
-                : `Pay all ${items.length} invoice${items.length !== 1 ? "s" : ""} →`}
+              Continue adding
             </button>
-            <button
-              type="button"
-              onClick={onClear}
-              disabled={paying}
-              style={{ width: "100%", background: "#fff", color: paying ? "#ccc" : "#888", border: "1.5px solid #e4e8ed", borderRadius: 10, padding: "10px", fontSize: 13, fontWeight: 600, cursor: paying ? "not-allowed" : "pointer" }}
-            >
-              Clear cart
-            </button>
-            <div style={{ fontSize: 11, color: "#aaa", marginTop: 10, textAlign: "center", lineHeight: 1.5 }}>
-              Each invoice opens in a Stripe payment window (popup or tab — toggle in the nav). In popup mode the list auto-updates when you close the window; in tab mode, click Refresh after paying.
-            </div>
           </div>
         )}
       </aside>

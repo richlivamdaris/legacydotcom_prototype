@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import type { Listing, PaymentMode } from "./api.js";
 import { StatusBadge, formatCurrency, InfoIcon } from "./shared.js";
 
@@ -84,10 +84,13 @@ interface Props {
 
 type Filter = "all" | "published" | "pending" | "upcoming" | "draft";
 
+const PAGE_SIZE = 10;
+
 export function ListingsTab({ listings, onNew, onOpenListing }: Props) {
   const [statusFilter, setStatusFilter] = useState<Filter>("all");
   const [newspaperFilter, setNewspaperFilter] = useState("all");
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
 
   const newspapers = useMemo(() => {
     const s = new Set<string>();
@@ -101,6 +104,15 @@ export function ListingsTab({ listings, onNew, onOpenListing }: Props) {
     const matchesSearch = !search || l.deceasedName.toLowerCase().includes(search.toLowerCase());
     return matchesStatus && matchesPaper && matchesSearch;
   });
+
+  useEffect(() => { setPage(1); }, [statusFilter, newspaperFilter, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pageStart = (currentPage - 1) * PAGE_SIZE;
+  const pageRows = filtered.slice(pageStart, pageStart + PAGE_SIZE);
+  const showingFrom = filtered.length === 0 ? 0 : pageStart + 1;
+  const showingTo = Math.min(pageStart + PAGE_SIZE, filtered.length);
 
   const filters: Array<{ v: Filter; label: string }> = [
     { v: "all", label: "All" },
@@ -177,7 +189,7 @@ export function ListingsTab({ listings, onNew, onOpenListing }: Props) {
           {filtered.length === 0 && (
             <tr><td colSpan={7} className="empty">No listings match the selected filters.</td></tr>
           )}
-          {filtered.map((l) => (
+          {pageRows.map((l) => (
             <tr key={l.id}>
               <td style={{ fontWeight: 600 }}>{l.deceasedName}</td>
               <td>{l.newspaper || "—"}</td>
@@ -207,9 +219,36 @@ export function ListingsTab({ listings, onNew, onOpenListing }: Props) {
       </table>
 
       <div className="pager-row">
-        <div className="pager-info">{filtered.length} listing{filtered.length !== 1 ? "s" : ""}</div>
-        <div className="pager-controls" />
+        <div className="pager-info">
+          {filtered.length === 0
+            ? "0 listings"
+            : `Showing ${showingFrom}–${showingTo} of ${filtered.length} listing${filtered.length !== 1 ? "s" : ""}`}
+        </div>
+        <Pager current={currentPage} totalPages={totalPages} onChange={setPage} />
       </div>
+    </div>
+  );
+}
+
+function Pager({ current, totalPages, onChange }: { current: number; totalPages: number; onChange: (p: number) => void }) {
+  if (totalPages <= 1) return <div className="pager-controls" />;
+  const items: Array<number | "…"> = [];
+  for (let p = 1; p <= totalPages; p++) {
+    if (p === 1 || p === totalPages || (p >= current - 1 && p <= current + 1)) {
+      items.push(p);
+    } else if (items[items.length - 1] !== "…") {
+      items.push("…");
+    }
+  }
+  return (
+    <div className="pager-controls">
+      <button type="button" className="pager-btn" disabled={current === 1} aria-label="Previous page" onClick={() => onChange(current - 1)}>‹</button>
+      {items.map((it, idx) =>
+        it === "…"
+          ? <span key={`e${idx}`} className="pager-ellipsis">…</span>
+          : <button key={it} type="button" className={`pager-btn${it === current ? " active" : ""}`} onClick={() => onChange(it)}>{it}</button>
+      )}
+      <button type="button" className="pager-btn" disabled={current === totalPages} aria-label="Next page" onClick={() => onChange(current + 1)}>›</button>
     </div>
   );
 }

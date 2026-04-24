@@ -1,7 +1,6 @@
 import { createObituaryInvoice } from "./invoicing.js";
 import {
   addListing,
-  baseMonthOf,
   getListings,
   saveLoyalty,
   getLoyalty,
@@ -286,7 +285,7 @@ const SEED_LISTINGS: CreateListingInput[] = [
 
 // Bump this when the seed/data model changes in a breaking way so startup
 // knows to wipe the store and re-seed.
-const SEED_VERSION = 6;
+const SEED_VERSION = 7;
 
 export async function ensureSeeded(): Promise<void> {
   const { readFile, unlink } = await import("node:fs/promises");
@@ -343,7 +342,7 @@ export async function ensureSeeded(): Promise<void> {
   const UNPAID_TAIL = 3;
   const unpaidMonthKeys = new Set(
     [...monthly]
-      .sort((a, b) => baseMonthOf(b.month).localeCompare(baseMonthOf(a.month)))
+      .sort((a, b) => b.month.localeCompare(a.month))
       .slice(0, UNPAID_TAIL)
       .map((m) => m.month),
   );
@@ -363,7 +362,7 @@ export async function ensureSeeded(): Promise<void> {
   // the demo shows them as Published alongside their on-account siblings —
   // except for listings whose billing month is in the unpaid tail, which
   // should visibly still need action.
-  const unpaidBaseMonths = new Set([...unpaidMonthKeys].map(baseMonthOf));
+  const unpaidBaseMonths = new Set(unpaidMonthKeys);
   const allListings = await getListings();
   const payNowHistoricals = allListings.filter((l) => {
     if (l.paymentMode !== "invoice" || !l.invoiceId || l.status === "published") return false;

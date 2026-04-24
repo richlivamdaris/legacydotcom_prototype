@@ -1,7 +1,6 @@
 import type Stripe from "stripe";
 import { stripe } from "./stripe.js";
 import {
-  baseMonthOf,
   getListings,
   getMonthlyInvoices,
   saveListings,
@@ -32,50 +31,43 @@ async function findOrCreateCustomer(): Promise<Stripe.Customer> {
 // Stripe calls happen here — the Stripe invoice is created only when the
 // funeral home clicks "Pay now" on the monthly row.
 //
-// When the base monthly invoice for this month has already been finalized
-// in Stripe (status "open" or "paid"), we can't safely add more line items
-// to it. Instead, a supplementary record is created for just the new
-// listing — keyed "YYYY-MM:s1", "YYYY-MM:s2", … — so the funeral home
-// can pay only the additional amount. This shows up as a separate
-// "Ready to pay" row on the Invoices tab.
+// If that month's invoice has already been finalized/paid, we can't add
+// more line items to it, so the listing rolls forward to the next month
+// (and so on, in the edge case where the next month is already settled too).
 export async function attachListingToMonthly(listing: Listing): Promise<MonthlyInvoiceRecord> {
   const base = billingMonthFor(listing.publicationDate, listing.createdAtIso);
-  const all = await getMonthlyInvoices();
-  const forMonth = all.filter((m) => baseMonthOf(m.month) === base);
+  return attachToMonth(listing, base);
+}
 
-  // Extendable = still in the "pending" bucket, nothing sent to Stripe yet.
-  // We can just append another line.
-  const extendable = forMonth.find(
-    (m) => m.status === "pending" && m.stripeInvoiceId === null,
-  );
-  if (extendable) {
-    if (extendable.listingIds.includes(listing.id)) return extendable;
-    return upsertMonthlyInvoice(extendable.month, {
-      listingIds: [...extendable.listingIds, listing.id],
-      totalAmountUsd: extendable.totalAmountUsd + listing.amountUsd,
+async function attachToMonth(listing: Listing, month: string): Promise<MonthlyInvoiceRecord> {
+  const all = await getMonthlyInvoices();
+  const existing = all.find((m) => m.month === month);
+
+  if (existing && existing.status === "pending" && existing.stripeInvoiceId === null) {
+    if (existing.listingIds.includes(listing.id)) return existing;
+    return upsertMonthlyInvoice(month, {
+      listingIds: [...existing.listingIds, listing.id],
+      totalAmountUsd: existing.totalAmountUsd + listing.amountUsd,
     });
   }
 
-  // No extendable record. If there's nothing at all for this month yet,
-  // open a fresh base record. Otherwise the base is finalized/paid, so
-  // spin up a supplementary record for just this new listing.
-  if (forMonth.length === 0) {
-    return upsertMonthlyInvoice(base, {
+  if (!existing) {
+    return upsertMonthlyInvoice(month, {
       listingIds: [listing.id],
       totalAmountUsd: listing.amountUsd,
     });
   }
 
-  const supplementCount = forMonth.filter((m) => m.month.includes(":s")).length;
-  const nextSeq = supplementCount + 1;
-  const supplementKey = `${base}:s${nextSeq}`;
-  const [y, mo] = base.split("-");
-  return upsertMonthlyInvoice(supplementKey, {
-    listingIds: [listing.id],
-    totalAmountUsd: listing.amountUsd,
-    status: "pending",
-    friendlyId: `INV-${y}-${mo}-S${nextSeq}`,
-  });
+  // Month is already finalized or paid — roll forward.
+  return attachToMonth(listing, nextMonthKey(month));
+}
+
+function nextMonthKey(monthKey: string): string {
+  const [yStr, mStr] = monthKey.split("-");
+  const y = Number(yStr);
+  const m = Number(mStr);
+  if (m === 12) return `${y + 1}-01`;
+  return `${y}-${String(m + 1).padStart(2, "0")}`;
 }
 
 // Called when the funeral home hits "Pay now" on a pending monthly row.
