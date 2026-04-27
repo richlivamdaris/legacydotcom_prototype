@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { MonthlyInvoiceRow, MonthlyInvoiceStatus } from "./api.js";
 import { payMonthlyInvoice } from "./api.js";
-import { formatCurrency, InfoIcon } from "./shared.js";
+import { formatCurrency, InfoIcon, FilterDivider, FilterSearch, PillDropdown } from "./shared.js";
 import { openPaymentPopup } from "./paymentPopup.js";
 
 interface Props {
@@ -183,29 +183,7 @@ export function InvoicesTab({ invoices, onRefresh, simulateError, onPayError, ac
       </div>
 
       <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "0 0 16px", flexWrap: "wrap" }}>
-        <div className="filter-search-wrap" style={{ position: "relative", minWidth: 200, maxWidth: 240 }}>
-          <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", display: "inline-flex", pointerEvents: "none" }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.3-4.3" />
-            </svg>
-          </span>
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search invoices…"
-            style={{
-              fontFamily: "'Open Sans', sans-serif", fontSize: 13, fontWeight: 600,
-              color: "#555", background: "#f3f4f6",
-              border: "1.5px solid transparent", borderRadius: 8,
-              padding: "0 12px 0 34px", height: 40, width: "100%",
-              outline: "none", transition: "border-color 0.15s, background 0.15s",
-            }}
-            onFocus={(e) => { e.currentTarget.style.borderColor = "#1a8fd1"; e.currentTarget.style.background = "#fff"; }}
-            onBlur={(e) => { e.currentTarget.style.borderColor = "transparent"; e.currentTarget.style.background = "#f3f4f6"; }}
-          />
-        </div>
+        <FilterSearch value={search} onChange={setSearch} placeholder="Search invoices…" />
 
         <FilterDivider />
 
@@ -513,91 +491,3 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
   );
 }
 
-function FilterDivider() {
-  return <div style={{ width: 1, height: 24, background: "#e5e7eb", flexShrink: 0 }} />;
-}
-
-interface DropdownOption {
-  value: string;
-  label: string;
-  danger?: boolean;
-}
-
-function PillDropdown({ value, prefix, label, options, onChange }: {
-  value: string;
-  prefix: string;
-  label: string;
-  options: DropdownOption[];
-  onChange: (v: string) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const wrapRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const onDocClick = (e: MouseEvent) => {
-      if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);
-    };
-    const onEsc = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
-    document.addEventListener("mousedown", onDocClick);
-    document.addEventListener("keydown", onEsc);
-    return () => {
-      document.removeEventListener("mousedown", onDocClick);
-      document.removeEventListener("keydown", onEsc);
-    };
-  }, [open]);
-
-  return (
-    <div ref={wrapRef} style={{ position: "relative", display: "inline-block" }}>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        style={{
-          fontFamily: "'Open Sans', sans-serif", fontSize: 13, fontWeight: 600,
-          background: "#f3f4f6", border: "none", borderRadius: 8,
-          padding: "0 14px", height: 40, cursor: "pointer",
-          display: "inline-flex", alignItems: "center", gap: 5,
-          color: "#555", transition: "background 0.15s",
-        }}
-        onMouseOver={(e) => { e.currentTarget.style.background = "#e9eaec"; }}
-        onMouseOut={(e) => { e.currentTarget.style.background = "#f3f4f6"; }}
-      >
-        <span>{prefix}: {label}</span>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="m6 9 6 6 6-6" />
-        </svg>
-      </button>
-      {open && (
-        <div style={{
-          position: "absolute", top: "calc(100% + 4px)", left: 0,
-          background: "#fff", border: "1.5px solid #e5e7eb",
-          borderRadius: 8, boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
-          minWidth: 150, zIndex: 200, overflow: "hidden",
-        }}>
-          {options.map((opt) => {
-            const active = opt.value === value;
-            return (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => { onChange(opt.value); setOpen(false); }}
-                style={{
-                  width: "100%", textAlign: "left",
-                  padding: "9px 14px", fontSize: 13, fontWeight: 600,
-                  background: active ? "#f3f4f6" : "none",
-                  border: "none", cursor: "pointer",
-                  fontFamily: "'Open Sans', sans-serif",
-                  color: opt.danger ? "#dc2626" : "#555",
-                }}
-                onMouseOver={(e) => { e.currentTarget.style.background = opt.danger ? "#fef2f2" : "#f3f4f6"; }}
-                onMouseOut={(e) => { e.currentTarget.style.background = active ? "#f3f4f6" : "none"; }}
-              >
-                {opt.label}
-              </button>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-}

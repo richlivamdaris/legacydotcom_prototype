@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { createListing, deleteListing, type Listing, type PaymentMode } from "./api.js";
 import { InfoIcon } from "./shared.js";
+import { openPaymentPopup } from "./paymentPopup.js";
 
 interface Props {
   onClose: () => void;
@@ -152,6 +153,9 @@ export function NewObituaryModal({ onClose, onCreated, editing, onAddToCart }: P
         dateOfDeath: dod || null,
         obituaryText: obitText,
       });
+      if (payChoice === "card" && res.hostedInvoiceUrl) {
+        await openPaymentPopup(res.hostedInvoiceUrl);
+      }
       setConfirmation({
         ref: res.listing.friendlyInvoiceId,
         pointsEarned: res.pointsEarned,

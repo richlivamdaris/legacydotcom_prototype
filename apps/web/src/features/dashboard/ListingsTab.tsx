@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import type { Listing, PaymentMode } from "./api.js";
-import { StatusBadge, formatCurrency, InfoIcon } from "./shared.js";
+import { StatusBadge, formatCurrency, InfoIcon, FilterDivider, FilterSearch, PillDropdown } from "./shared.js";
 
 function PaymentModeDot({ mode }: { mode: PaymentMode }) {
   const onAccount = mode === "on_account";
@@ -84,11 +84,43 @@ interface Props {
 
 type Filter = "all" | "published" | "pending" | "upcoming" | "draft";
 
+const STATUS_LABEL: Record<Filter, string> = {
+  all: "All",
+  published: "Published",
+  pending: "Pending",
+  upcoming: "Scheduled",
+  draft: "Draft",
+};
+
+type DateFilter = "all" | "thismonth" | "last3" | "thisyear";
+
+const DATE_LABEL: Record<DateFilter, string> = {
+  all: "All time",
+  thismonth: "This month",
+  last3: "Last 3 months",
+  thisyear: "This year",
+};
+
+// Returns the inclusive lower bound (ISO "YYYY-MM-DD") for the selected
+// range, or null for "all time". Listings whose publicationDate is >= this
+// bound pass the filter; listings without a publicationDate never match a
+// bounded range (they fall under "All time" only).
+function dateRangeStart(range: DateFilter, now: Date = new Date()): string | null {
+  if (range === "all") return null;
+  const y = now.getFullYear();
+  const m = now.getMonth();
+  if (range === "thismonth") return new Date(y, m, 1).toISOString().slice(0, 10);
+  if (range === "last3") return new Date(y, m - 2, 1).toISOString().slice(0, 10);
+  if (range === "thisyear") return new Date(y, 0, 1).toISOString().slice(0, 10);
+  return null;
+}
+
 const PAGE_SIZE = 10;
 
 export function ListingsTab({ listings, onNew, onOpenListing }: Props) {
   const [statusFilter, setStatusFilter] = useState<Filter>("all");
   const [newspaperFilter, setNewspaperFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState<DateFilter>("all");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
 
@@ -98,14 +130,17 @@ export function ListingsTab({ listings, onNew, onOpenListing }: Props) {
     return Array.from(s).sort();
   }, [listings]);
 
+  const dateStart = dateRangeStart(dateFilter);
+
   const filtered = listings.filter((l) => {
     const matchesStatus = statusFilter === "all" || l.status === statusFilter;
     const matchesPaper = newspaperFilter === "all" || l.newspaper === newspaperFilter;
     const matchesSearch = !search || l.deceasedName.toLowerCase().includes(search.toLowerCase());
-    return matchesStatus && matchesPaper && matchesSearch;
+    const matchesDate = !dateStart || (l.publicationDate !== null && l.publicationDate >= dateStart);
+    return matchesStatus && matchesPaper && matchesSearch && matchesDate;
   });
 
-  useEffect(() => { setPage(1); }, [statusFilter, newspaperFilter, search]);
+  useEffect(() => { setPage(1); }, [statusFilter, newspaperFilter, dateFilter, search]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
@@ -114,13 +149,8 @@ export function ListingsTab({ listings, onNew, onOpenListing }: Props) {
   const showingFrom = filtered.length === 0 ? 0 : pageStart + 1;
   const showingTo = Math.min(pageStart + PAGE_SIZE, filtered.length);
 
-  const filters: Array<{ v: Filter; label: string }> = [
-    { v: "all", label: "All" },
-    { v: "published", label: "Published" },
-    { v: "pending", label: "Pending" },
-    { v: "upcoming", label: "Scheduled" },
-    { v: "draft", label: "Draft" },
-  ];
+  const statusLabel = STATUS_LABEL[statusFilter];
+  const paperLabel = newspaperFilter === "all" ? "All" : newspaperFilter;
 
   return (
     <div className="card">
@@ -129,43 +159,52 @@ export function ListingsTab({ listings, onNew, onOpenListing }: Props) {
         <span className="card-action" onClick={onNew}>+ New Obituary →</span>
       </div>
 
-      <div className="filter-row-v2">
-        <div className="filter-search-wrap">
-          <span className="search-ico">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.3-4.3" />
-            </svg>
-          </span>
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name…"
-            className="filter-input"
-          />
-        </div>
-        {filters.map((f) => (
-          <button
-            key={f.v}
-            type="button"
-            className={`filter-pill ${statusFilter === f.v ? "active" : ""}`}
-            onClick={() => setStatusFilter(f.v)}
-          >
-            {f.label}
-          </button>
-        ))}
-        <select
+      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "0 0 16px", flexWrap: "wrap" }}>
+        <FilterSearch value={search} onChange={setSearch} placeholder="Search by name…" />
+
+        <FilterDivider />
+
+        <PillDropdown
+          value={statusFilter}
+          prefix="Status"
+          label={statusLabel}
+          options={[
+            { value: "all", label: "All" },
+            { value: "published", label: "Published" },
+            { value: "pending", label: "Pending" },
+            { value: "upcoming", label: "Scheduled" },
+            { value: "draft", label: "Draft" },
+          ]}
+          onChange={(v) => setStatusFilter(v as Filter)}
+        />
+
+        <FilterDivider />
+
+        <PillDropdown
           value={newspaperFilter}
-          onChange={(e) => setNewspaperFilter(e.target.value)}
-          className="filter-select"
-          style={{ marginLeft: "auto" }}
-        >
-          <option value="all">All newspapers</option>
-          {newspapers.map((n) => (
-            <option key={n} value={n}>{n}</option>
-          ))}
-        </select>
+          prefix="Newspaper"
+          label={paperLabel}
+          options={[
+            { value: "all", label: "All newspapers" },
+            ...newspapers.map((n) => ({ value: n, label: n })),
+          ]}
+          onChange={setNewspaperFilter}
+        />
+
+        <FilterDivider />
+
+        <PillDropdown
+          value={dateFilter}
+          prefix="Date"
+          label={DATE_LABEL[dateFilter]}
+          options={[
+            { value: "all", label: "All time" },
+            { value: "thismonth", label: "This month" },
+            { value: "last3", label: "Last 3 months" },
+            { value: "thisyear", label: "This year" },
+          ]}
+          onChange={(v) => setDateFilter(v as DateFilter)}
+        />
       </div>
 
       <table className="listing-table">
